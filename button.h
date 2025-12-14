@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <raylib.h>
+#include "color.h"
 using namespace std;
 
 class Button {

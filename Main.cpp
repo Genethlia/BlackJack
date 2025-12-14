@@ -1,7 +1,6 @@
 #include "game.h"
 using namespace std;
 
-Color tableGreen = { 34, 139, 34, 255 };
 
 int main() {
 
@@ -15,7 +14,7 @@ int main() {
 		BeginDrawing();
 
 		if (!game.Drown) {
-			game.Update(0.2);
+			game.DrawStartingCards(0.2);
 		}
 
 		ClearBackground(tableGreen);

@@ -9,12 +9,12 @@ struct valRank {
 
 class Deck {
 private:
-	vector<valRank> cards;
-	int deckSize;
+	vector<valRank> cards;//The deck of cards
+	int deckSize;//52 cards
 public:
 	Deck();
 	vector<valRank> CreateDeck();
-	vector<valRank> RandomizeDeck();
-	void Draw();
-	valRank DrawCard();
+	vector<valRank> RandomizeDeck();//Shuffles the deck
+	void Draw();//Just for testing
+	valRank DrawCard();//Draws a card from the deck
 };

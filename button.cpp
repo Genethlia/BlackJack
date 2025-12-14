@@ -10,10 +10,11 @@ Button::Button(int y, string Text){
 	}
 	firstLetter = type[0];
 	secondLetter = type[1];
+
 }
 
 void Button::Draw(){
-	DrawRectangle(x, y, width, height, BLACK);
+	DrawRectangle(x, y, width, height, darkGreen);
 	switch (firstLetter) {
 	case 'S':
 		if (secondLetter=='T') {

@@ -13,7 +13,7 @@ Card::Card(float x, float y, valRank card)
 	color[1] = { 255,0,0,255 };
 
 	font = LoadFontEx("Fonts/monogram", 64, 0, 0);
-	ranksObj = new Images(card.rank); // <-- ranksObj is a pointer to Images
+	ranksObj = new Images(card.rank);
 
 	switch (card.rank) {
 	case 1:

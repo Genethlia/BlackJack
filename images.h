@@ -3,10 +3,11 @@
 
 class Images {
 public:
-	Images(int rank);
+	Images(int rank);//Constructor that loads images based on rank
 	~Images();
-	Texture filiTexture,bigfiliTexture;
+	Texture filiTexture, bigfiliTexture;//Textures for small and big suit images
+	Texture matTexture;//Table mat texture
 private:
-	Image image;
-
+	Image image;//Temporary image holder
+	Image mat;//Table mat image
 };
