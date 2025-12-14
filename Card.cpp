@@ -1,7 +1,7 @@
 #include "Card.h"
 
-Card::Card(float x, float y, valRank card)
-  : ranks(card.rank) {
+Card::Card(float x, float y, valRank card,Images* suitTextures,Font* font)
+  :suitTextures(suitTextures),font(font) {
 	this->x = x;
 	this->y = y;
 
@@ -12,38 +12,40 @@ Card::Card(float x, float y, valRank card)
 	color[0] = { 0,0,0,255 };
 	color[1] = { 255,0,0,255 };
 
-	font = LoadFontEx("Fonts/monogram", 64, 0, 0);
-	ranksObj = new Images(card.rank);
 
+	smalloffset = 0;
 	switch (card.rank) {
 	case 1:
-		offset = 35;
+		bigoffset = 35;
 		break;
 	case 2:
-		offset = 27;
+		bigoffset = 27;
+		smalloffset = 4;
 		break;
 	case 3:
-		offset = 40;
+		bigoffset = 40;
 		break;
 	default:
-		offset = 30;
+		bigoffset = 30;
 		break;
 	}
 
 }
 
-Card::~Card(){
-	UnloadFont(font);
-}
 
 void Card::Draw(){
 	int PointerOfcolor = GetColorOfRank(card);
 	DrawRectangle(x, y, width, height,WHITE);
-	DrawTextEx(font, cardnum(card).c_str(), { x + 5, y + 5 }, 30, 2, color[PointerOfcolor]);
-	DrawTextPro(font, cardnum(card).c_str(), { x+width-5, y+height-5 }, { 0,0 }, 180, 30, 2,color[PointerOfcolor]);
-	DrawTexture(ranksObj->filiTexture, x, y + 30, WHITE);
-	DrawTextureEx(ranksObj->filiTexture, { width + x, height + y-30 },180,1, WHITE);
-	DrawTexture(ranksObj->bigfiliTexture, x+width/2-offset, y+height/2-40, WHITE);
+	DrawTextEx(*font, cardnum(card).c_str(), { x + 5, y + 5 }, 30, 2, color[PointerOfcolor]);
+	DrawTextPro(*font, cardnum(card).c_str(), { x+width-5, y+height-5 }, { 0,0 }, 180, 30, 2,color[PointerOfcolor]);
+	// ranksObj textures are valid only if created for suit ranks
+	if (suitTextures->filiTexture.id != 0) {
+		DrawTexture(suitTextures->filiTexture, x+smalloffset, y + 30, WHITE);
+		DrawTextureEx(suitTextures->filiTexture, { width + x-smalloffset, height + y-30 },180,1, WHITE);
+	}
+	if (suitTextures->bigfiliTexture.id != 0) {
+		DrawTexture(suitTextures->bigfiliTexture, x+width/2-bigoffset, y+height/2-40, WHITE);
+	}
 	
 }
 

@@ -13,11 +13,9 @@ int main() {
 	while (!WindowShouldClose()) {
 		BeginDrawing();
 
-		if (!game.Drown) {
-			game.DrawStartingCards(0.2);
-		}
+		game.Update();
 
-		ClearBackground(tableGreen);
+		ClearBackground(WHITE);
 		game.Draw();
 
 		EndDrawing();

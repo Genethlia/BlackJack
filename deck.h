@@ -2,6 +2,7 @@
 #include <vector>
 using namespace std;
 
+// Struct to hold card value and rank
 struct valRank {
 	int value;
 	int rank;
@@ -13,7 +14,7 @@ private:
 	int deckSize;//52 cards
 public:
 	Deck();
-	vector<valRank> CreateDeck();
+	vector<valRank> CreateDeck();//Creates a standard deck of 52 cards
 	vector<valRank> RandomizeDeck();//Shuffles the deck
 	void Draw();//Just for testing
 	valRank DrawCard();//Draws a card from the deck
