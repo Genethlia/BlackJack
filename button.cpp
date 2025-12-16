@@ -26,7 +26,7 @@ int Button::findOffsetX(char type[10]){
 }
 
 Button::Button(int y, string Text){
-	x = 710;
+	x = 910;
 	this->y = y;
 	width = 280;
 	height = 100;

@@ -11,6 +11,9 @@ Game::Game(){
 	for (int i = 0; i < 4; i++) suitImages[i].LoadSuit(i);
 	gameImage.LoadMatAndHiddenCard();
 	mainFont = LoadFontEx("Fonts/ComSuns.ttf", 64, 0, 0);
+
+	roundOver = false;
+
 }
 
 void Game::Draw() {
@@ -18,6 +21,7 @@ void Game::Draw() {
 	DrawButtons();
 	DrawCards();
 	DrawScore();
+	DrawResultText();
 }
 
 void Game::UpdateDealing(double TimePassed){
@@ -62,8 +66,8 @@ void Game::DrawScore(){
 	int cpuScore = GetScore(cpuHand);
 	string playerScoreText = "Player Score: " + to_string(playerScore);
 	string cpuScoreText = "Dealer Score: " + to_string(cpuScore);
-	DrawText(playerScoreText.c_str(), 720, 830, 32, WHITE);
-	DrawText(cpuScoreText.c_str(), 720, 750, 32, WHITE);
+	DrawText(playerScoreText.c_str(), 920, 810, 32, WHITE);
+	DrawText(cpuScoreText.c_str(), 920, 730, 32, WHITE);
 }
 
 void Game::DrawButtons(){
@@ -75,12 +79,15 @@ void Game::DrawButtons(){
 		}
 }
 
-void Game::DrawBackground(){
+void Game::DrawBackground() {
 	DrawTexture(gameImage.matTexture, 0, 0, WHITE);
-	if (state==GameState::playerTurn) DrawUpsideCard();
-	DrawRectangle(705, 0, 295, 900, lightGreen);
-	DrawRectangle(700, 0, 5, 900, BLACK);
-	DrawRectangleLinesEx({ 0,0,1000,900 }, 5, BLACK);
+	if (state == GameState::playerTurn) DrawUpsideCard();
+	DrawRectangle(screenWidth - 295, 0, 295, 950, lightGreen);
+	DrawRectangle(screenWidth - 300, 0, 5, 950, BLACK);
+	DrawRectangleLinesEx({ 0,0,screenWidth,screenHeight }, 5, BLACK);
+	string mon = (to_string(money) + "$");
+	float spacing = MeasureText(mon.c_str(), 32);
+	DrawTextEx(mainFont,mon.c_str(), {screenWidth - spacing,5}, 32, 2, WHITE);
 }
 
 void Game::DrawUpsideCard(){
@@ -134,13 +141,68 @@ void Game::UpdateButtons(){
 }
 
 void Game::cpuGet17(){
-	if (GetScore(cpuHand) >= 17) {
+	if (GetScore(cpuHand) >= 17||GetScore(playerHand)>21||(GetScore(playerHand)==21&&playerHand.size()==2)) {
+		state = GameState::roundEnd;
 		return;
 	}
 	if (HasEnoughTimePassed(dealerLastUpdateTime, 0.8)) {
 		valRank card = deck.DrawCard();
 		cpuHand.push_back(card);
 		cpuCards.emplace_back(50 + cpuCards.size() * cardSpacing, dealer_Y, card,&suitImages[card.rank],&mainFont);
+	}
+}
+
+void Game::UpdateResults(){
+	if (roundOver) return;
+	if (GetScore(playerHand) > 21) {
+		resultText = "YOU LOST";
+	}
+	else if(GetScore(playerHand)==21&&playerHand.size()==2){
+		resultText = "BLACKJACK";
+	}
+	else {
+		if (GetScore(cpuHand)>21) {
+			resultText = "YOU WON";
+		}
+		else if (GetScore(playerHand) > GetScore(cpuHand)) {
+			resultText = "YOU WON";
+		}
+		else if (GetScore(playerHand) == GetScore(cpuHand)) {
+			resultText = "PUSH";
+		}
+		else {
+			resultText = "YOU LOST";
+		}
+	}
+	roundOver = true;
+}
+
+void Game::DrawResultText(){
+	if (!resultText.empty()) {
+		string PlayAgain = "Press any key to play again";
+		int x = (screenWidth-300) / 2;
+		int y = (screenHeight-250) / 2;
+		if (resultText == "PUSH") x = (screenWidth - 500) / 2;
+		int fontSize = 128;
+		int TextWidth = MeasureText(resultText.c_str(), fontSize);
+		DrawText(resultText.c_str(), x - TextWidth / 2, y, fontSize, RED);
+		DrawText(PlayAgain.c_str(), x-TextWidth/2+80, y + 200, 32, WHITE);
+	}
+}
+
+void Game::ResetRound(){
+	if (GetKeyPressed()) {
+		state = GameState::dealing;
+		LastUpdateTime = 0;
+		dealerLastUpdateTime = 0;
+		cardsDealtCount = 0;
+		cpuHiddenCard = { 0, 0 };
+		roundOver = false;
+		resultText.clear();
+		cpuHand.clear();
+		cpuCards.clear();
+		playerHand.clear();
+		playerCards.clear();
 	}
 }
 
@@ -154,6 +216,10 @@ void Game::Update(){
 		break;
 	case GameState::dealerTurn:
 		cpuGet17();
+		break;
+	case GameState::roundEnd:
+		UpdateResults();
+		ResetRound();
 		break;
 	default:
 		break;

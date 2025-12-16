@@ -40,6 +40,7 @@ void Deck::Draw() {
 valRank Deck::DrawCard(){
     if (cards.empty()) {
         cards = RandomizeDeck();
+        deckSize = 52;
     }
     valRank temp = cards[deckSize - 1];
     cards.pop_back();

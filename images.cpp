@@ -34,7 +34,7 @@ void Images::LoadSuit(int rank) {
 void Images::LoadMatAndHiddenCard() {
 		// mat and hidden card images for the table
 		mat = LoadImage("Images/mat.jpg");
-		ImageResize(&mat, 1000, 900);
+		ImageResize(&mat, 1200, 950);
 		matTexture = LoadTextureFromImage(mat);
 		UnloadImage(mat);
 

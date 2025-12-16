@@ -18,3 +18,11 @@ public:
 	bool IsButtonPressed();//check if button is pressed
 	bool collision();//check if mouse is over the button
 };
+
+class BetButton:public Button {
+private:
+	int betAmount;
+public:
+	BetButton(int x, string Text, int betAmount);
+	int GetBetAmount();//get the bet amount of the button
+};

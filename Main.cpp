@@ -4,7 +4,7 @@ using namespace std;
 
 int main() {
 
-	InitWindow(1000, 900, "BlackJack");
+	InitWindow(screenWidth, screenHeight, "BlackJack");
 	SetTargetFPS(60);
 
 	Game game = Game();
