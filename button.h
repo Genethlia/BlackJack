@@ -5,24 +5,37 @@
 using namespace std;
 
 class Button {
+protected:
+    int x, y, width;
 private:
-	int x, y;
-	int width, height;
-	string Text;//temporary string to hold the button text
-	char type[10];//array to hold the text letters
-	int offsetX;
-	int findOffsetX(char type[10]);//function to find the offset for text positioning
+    int height;
+    string Text; // temporary string to hold the button text
+    char type[10]; // array to hold the text letters
+    int offsetX;
+    int findOffsetX(char type[10]); // function to find the offset for text positioning
 public:
-	Button(int y, string Text);
-	void Draw();//draw the button
-	bool IsButtonPressed();//check if button is pressed
-	bool collision();//check if mouse is over the button
+    Button(int y, string Text);
+    virtual void Draw(); // draw the button
+    bool IsButtonPressed(); // check if button is pressed
+    virtual bool collision(); // check if mouse is over the button
 };
 
 class BetButton:public Button {
 private:
-	int betAmount;
+	int radius;
+    Color color;
+    pair<Color,Color> hoverColor();
 public:
-	BetButton(int x, string Text, int betAmount);
-	int GetBetAmount();//get the bet amount of the button
+    int betAmount;
+	BetButton(int x,int betAmount);
+	string GetBetAmount();//get the bet amount of the button
+	void Draw() override;
+	bool collision() override;
+};
+
+class UndoConfirmButton :public Button {
+public:
+    UndoConfirmButton(float y,string Text);
+private:
+    float y;
 };

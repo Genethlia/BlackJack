@@ -4,11 +4,12 @@
 #include "button.h"
 #include <vector>
 #include <iostream>
+#include <stack>
 constexpr int player_Y = 650;
 constexpr int dealer_Y = 50;
 constexpr int cardSpacing = 160;
-constexpr int screenWidth = 1200;
-constexpr int screenHeight = 950;
+inline float screenWidth = 1200;
+inline float screenHeight = 950;
 using namespace std;
 
 enum class GameState{
@@ -38,18 +39,22 @@ private:
 	void DrawButtons();//Draws the buttons
 	void DrawBackground();//Draws the table background
 	void DrawUpsideCard();
+	void DrawBetButtons();//Draws the bet buttons
+	void DrawMoneyBets();//Draws the player's money and current bet
 	void HitPlayer();//Adds a card to the player's hand
 	void UpdateButtons();//Updates button states
 	void cpuGet17();//Dealer draws cards until reaching at least 17
 	void UpdateResults();//Calculates and displays the results of the round
+	void UpdateBettingButtons();//Updates bets based on button presses
 	void DrawResultText();//Draws the result text
 	void ResetRound();//Resets the game state for a new round
 
-	double LastUpdateTime;
-	double dealerLastUpdateTime;
+	double LastUpdateTime;//For dealing cards over time
+	double dealerLastUpdateTime;//For dealer drawing cards over time
 
 	int cardsDealtCount;
 	int money;
+	int bet;
 	int GetScore(const vector<valRank>& hand);//Calculates the score of a hand
 
 	vector<valRank> playerHand;
@@ -62,6 +67,11 @@ private:
 	Button Double = Button(400, "DOUBLE");
 	Button Split = Button(550, "SPLIT");
 
+	BetButton betButtons[4] = { BetButton(150,10),BetButton(350,50),BetButton(550,100),BetButton(750,200) };
+
+	UndoConfirmButton undoButton = UndoConfirmButton(550,"UNDO");
+	UndoConfirmButton confirmButton = UndoConfirmButton(700,"CONFIRM BET");
+
 	Images gameImage;
 	Images suitImages[4];    // shared textures for suits
 
@@ -72,6 +82,8 @@ private:
 	GameState state = GameState::betting;
 
 	string resultText;
+
+	stack<int> lastBet;
 
 	Deck deck;
 };

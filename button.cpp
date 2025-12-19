@@ -19,6 +19,12 @@ int Button::findOffsetX(char type[10]){
 	case 'H':
 		offset = 95;
 		break;
+	case 'U':
+		offset = 220;
+		break;
+	case 'C':
+		offset = 120;
+		break;
 	default:
 		break;
 	}
@@ -39,7 +45,7 @@ Button::Button(int y, string Text){
 
 void Button::Draw(){
 	Color color;
-		if (collision()) {
+	if (collision()) {
 		color = tableGreen;
 	}
 	else{
@@ -63,3 +69,61 @@ bool Button::collision(){
 }
 
 
+pair<Color, Color> BetButton::hoverColor(){
+	switch (betAmount) {
+	case 10:
+		return pair(yellow, lightYellow);
+	case 50:
+		return pair(blue, lightBlue);
+	case 100:
+		return pair(red, lightRed);
+	case 200:
+		return pair(purple, lightPurple);
+	default:
+		return pair(WHITE, WHITE);
+	}
+}
+
+BetButton::BetButton(int x, int betAmount) : Button(x, to_string(betAmount)) {
+	this->x = x;
+	this->y = GetScreenHeight() / 2-50;
+	this->betAmount = betAmount;
+	radius = 75;
+	color = WHITE;
+}
+
+string BetButton::GetBetAmount()
+{
+	return to_string(betAmount);
+}
+
+void BetButton::Draw(){
+	int offsetX = 15;
+	int offsetY = 10;
+	if (collision()) {
+		color = hoverColor().first;
+	}
+	else {
+		color = hoverColor().second;
+	}
+	DrawCircle(x, y, radius, color);
+	DrawCircle(x, y, radius*3/4, WHITE);
+	DrawCircle(x, y, radius/2, color);
+	if (GetBetAmount().size() == 3) offsetX = 20;
+	if (GetBetAmount() == "200") offsetX = 25;
+	if (GetBetAmount() == "10") offsetX = 12;
+	DrawText(GetBetAmount().c_str(), x - offsetX, y - offsetY, 30, WHITE);
+}
+
+bool BetButton::collision(){
+	if (CheckCollisionPointCircle(GetMousePosition(), Vector2(x, y),radius)) {
+		return true;
+	}
+	return false;
+}
+
+UndoConfirmButton::UndoConfirmButton(float y,string Text) : Button(y, Text) {
+	this->y = y;
+	x = (GetScreenWidth() - 890) / 2;
+	width = 600;
+}

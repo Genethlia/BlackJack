@@ -6,6 +6,7 @@ Game::Game(){
 	dealerLastUpdateTime = 0;
 	cardsDealtCount = 0;
 	money = 1000;
+	bet = 0;
 	cpuHiddenCard = {0, 0}; // Initialize to default value
 
 	for (int i = 0; i < 4; i++) suitImages[i].LoadSuit(i);
@@ -17,16 +18,19 @@ Game::Game(){
 }
 
 void Game::Draw() {
-	DrawBackground();
-	DrawButtons();
-	DrawCards();
-	DrawScore();
-	DrawResultText();
-}
+		DrawBackground();
+		if (state == GameState::betting) DrawBetButtons();
+		else { DrawButtons(); };
+		DrawCards();
+		DrawScore();
+		DrawResultText();
+		DrawMoneyBets();
+	}
 
 void Game::UpdateDealing(double TimePassed){
 		if (HasEnoughTimePassed(LastUpdateTime, TimePassed)) {
 			valRank xard = deck.DrawCard();
+			vector<valRank> temp;
 			//valRank xard = { 1,1 };//testing split
 			switch(cardsDealtCount){
 			case 0:
@@ -34,6 +38,7 @@ void Game::UpdateDealing(double TimePassed){
 				playerHand.push_back(xard);
 				break;
 			case 1:
+				//xard = { 10,1 };
 				cpuCards.emplace_back(50, dealer_Y, xard, &suitImages[xard.rank], &mainFont);
 				cpuHand.push_back(xard);
 				break;
@@ -42,8 +47,17 @@ void Game::UpdateDealing(double TimePassed){
 				playerHand.push_back(xard);
 				break;
 			case 3:
+				//xard = { 1,2 };
+				temp.push_back(xard);
 				cpuHiddenCard = xard;
-				state = GameState::playerTurn;
+				if (GetScore(cpuHand) + GetScore(temp) == 21) {
+					cpuCards.emplace_back(210, dealer_Y, xard, &suitImages[xard.rank], &mainFont);
+					cpuHand.push_back(xard);
+					state = GameState::roundEnd;
+				}
+				else {
+					state = GameState::playerTurn;
+				}
 				return;
 			default:
 				break;
@@ -73,7 +87,9 @@ void Game::DrawScore(){
 void Game::DrawButtons(){
 		hit.Draw();
 		stand.Draw();
-		//Double.Draw();
+		if (bet <= money) {
+			Double.Draw();
+		}
 		if (playerHand.size()>=2 && playerHand[0].value == playerHand[1].value) {
 			Split.Draw();
 		}
@@ -85,15 +101,29 @@ void Game::DrawBackground() {
 	DrawRectangle(screenWidth - 295, 0, 295, 950, lightGreen);
 	DrawRectangle(screenWidth - 300, 0, 5, 950, BLACK);
 	DrawRectangleLinesEx({ 0,0,screenWidth,screenHeight }, 5, BLACK);
-	string mon = (to_string(money) + "$");
-	float spacing = MeasureText(mon.c_str(), 32);
-	DrawTextEx(mainFont,mon.c_str(), {screenWidth - spacing,5}, 32, 2, WHITE);
 }
 
 void Game::DrawUpsideCard(){
 	if (state==GameState::playerTurn) {
 			DrawTexture(gameImage.hiddenCardTexture, 180, 27, WHITE);
 	}
+}
+
+void Game::DrawBetButtons(){
+	for (int i = 0; i < 4; i++) {
+		betButtons[i].Draw();
+	}
+	undoButton.Draw();
+	confirmButton.Draw();
+}
+
+void Game::DrawMoneyBets(){
+	string mon = (to_string(money) + "$");
+	float spacing = MeasureText(mon.c_str(), 32);
+	DrawTextEx(mainFont, mon.c_str(), { screenWidth - spacing,5 }, 32, 2, WHITE);
+	string be = ("Bet: " + to_string(bet) + "$");
+	spacing = 290;
+	DrawTextEx(mainFont, be.c_str(), { screenWidth-spacing,5 }, 32, 2, WHITE);
 }
 
 int Game::GetScore(const vector<valRank>& hand){
@@ -130,11 +160,18 @@ void Game::UpdateButtons(){
 		if (hit.IsButtonPressed() && GetScore(playerHand) < 21) {
 			HitPlayer();
 		}
-		if (stand.IsButtonPressed()||GetScore(playerHand)>=21) {
+		else if (stand.IsButtonPressed()||GetScore(playerHand)>=21) {
 			state = GameState::dealerTurn;
-			Card card(210, dealer_Y, cpuHiddenCard,&suitImages[cpuHiddenCard.rank],&mainFont);
+			Card card(210, dealer_Y, cpuHiddenCard, &suitImages[cpuHiddenCard.rank], &mainFont);
 			cpuCards.push_back(card);
 			cpuHand.push_back(cpuHiddenCard);
+			dealerLastUpdateTime = GetTime();
+		}
+		else if (Double.IsButtonPressed()) {
+			money -= bet;
+			bet *= 2;
+			HitPlayer();
+			state = GameState::dealerTurn;
 			dealerLastUpdateTime = GetTime();
 		}
 	}
@@ -159,22 +196,58 @@ void Game::UpdateResults(){
 	}
 	else if(GetScore(playerHand)==21&&playerHand.size()==2){
 		resultText = "BLACKJACK";
+		money += bet * 5 / 2;
 	}
 	else {
 		if (GetScore(cpuHand)>21) {
 			resultText = "YOU WON";
+			money += bet * 2;
 		}
 		else if (GetScore(playerHand) > GetScore(cpuHand)) {
 			resultText = "YOU WON";
+			money += bet * 2;
 		}
 		else if (GetScore(playerHand) == GetScore(cpuHand)) {
 			resultText = "PUSH";
+			money += bet;
 		}
 		else {
 			resultText = "YOU LOST";
 		}
 	}
 	roundOver = true;
+}
+
+void Game::UpdateBettingButtons()
+{
+	for (int i = 0; i < 4; i++) {
+		if (betButtons[i].IsButtonPressed()) {
+			int betAmount = betButtons[i].betAmount;
+			if (money >= betAmount) {
+				bet += betAmount;
+				money -= betAmount;
+				lastBet.push(betAmount);
+			}
+			else if(money!=0){
+				bet += money;
+				lastBet.push(money);
+				money = 0;
+			}
+		}
+	}
+	if (undoButton.IsButtonPressed()) {
+		if (!lastBet.empty()) {
+			bet -= lastBet.top();
+			money += lastBet.top();
+			lastBet.pop();
+		}
+	}
+	if (confirmButton.IsButtonPressed()) {
+		if (bet != 0) {
+			state = GameState::dealing;
+			LastUpdateTime = GetTime();
+		}
+	}
 }
 
 void Game::DrawResultText(){
@@ -192,7 +265,11 @@ void Game::DrawResultText(){
 
 void Game::ResetRound(){
 	if (GetKeyPressed()) {
-		state = GameState::dealing;
+		state = GameState::betting;
+		bet = 0;
+		while (!lastBet.empty()) {
+			lastBet.pop();
+		}
 		LastUpdateTime = 0;
 		dealerLastUpdateTime = 0;
 		cardsDealtCount = 0;
@@ -206,8 +283,12 @@ void Game::ResetRound(){
 	}
 }
 
+
 void Game::Update(){
 	switch (state) {
+	case GameState::betting:
+		UpdateBettingButtons();
+		break;
 	case GameState::dealing:
 		UpdateDealing(0.8);
 		break;
