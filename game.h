@@ -68,6 +68,7 @@ private:
 	Button Split = Button(550, "SPLIT");
 
 	BetButton betButtons[4] = { BetButton(150,10),BetButton(350,50),BetButton(550,100),BetButton(750,200) };
+	AllInButton allInButton = AllInButton();
 
 	UndoConfirmButton undoButton = UndoConfirmButton(550,"UNDO");
 	UndoConfirmButton confirmButton = UndoConfirmButton(700,"CONFIRM BET");

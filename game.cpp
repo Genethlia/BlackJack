@@ -89,6 +89,10 @@ void Game::DrawButtons(){
 		stand.Draw();
 		if (bet <= money) {
 			Double.Draw();
+			Split.y = 550;
+		}
+		else {
+			Split.y = 400;
 		}
 		if (playerHand.size()>=2 && playerHand[0].value == playerHand[1].value) {
 			Split.Draw();
@@ -115,6 +119,7 @@ void Game::DrawBetButtons(){
 	}
 	undoButton.Draw();
 	confirmButton.Draw();
+	allInButton.Draw();
 }
 
 void Game::DrawMoneyBets(){
@@ -167,10 +172,15 @@ void Game::UpdateButtons(){
 			cpuHand.push_back(cpuHiddenCard);
 			dealerLastUpdateTime = GetTime();
 		}
-		else if (Double.IsButtonPressed()) {
+		else if (Double.IsButtonPressed()&&bet<=money) {
 			money -= bet;
 			bet *= 2;
 			HitPlayer();
+			state = GameState::dealerTurn;
+			dealerLastUpdateTime = GetTime();
+		}
+		else if (Split.IsButtonPressed() && playerHand.size() >= 2 && playerHand[0].value == playerHand[1].value) {
+			//Splitting not done yet
 			state = GameState::dealerTurn;
 			dealerLastUpdateTime = GetTime();
 		}
@@ -246,6 +256,13 @@ void Game::UpdateBettingButtons()
 		if (bet != 0) {
 			state = GameState::dealing;
 			LastUpdateTime = GetTime();
+		}
+	}
+	if (allInButton.IsButtonPressed()) {
+		if (money != 0) {
+			bet += money;
+			lastBet.push(money);
+			money = 0;
 		}
 	}
 }

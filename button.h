@@ -6,7 +6,7 @@ using namespace std;
 
 class Button {
 protected:
-    int x, y, width;
+    int x, width;
 private:
     int height;
     string Text; // temporary string to hold the button text
@@ -14,6 +14,7 @@ private:
     int offsetX;
     int findOffsetX(char type[10]); // function to find the offset for text positioning
 public:
+    int y;
     Button(int y, string Text);
     virtual void Draw(); // draw the button
     bool IsButtonPressed(); // check if button is pressed
@@ -21,8 +22,9 @@ public:
 };
 
 class BetButton:public Button {
-private:
-	int radius;
+protected:
+    string Text;
+    int radius;
     Color color;
     pair<Color,Color> hoverColor();
 public:
@@ -38,4 +40,9 @@ public:
     UndoConfirmButton(float y,string Text);
 private:
     float y;
+};
+
+class AllInButton :public BetButton {
+public:
+    AllInButton();
 };

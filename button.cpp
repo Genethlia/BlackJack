@@ -71,6 +71,8 @@ bool Button::collision(){
 
 pair<Color, Color> BetButton::hoverColor(){
 	switch (betAmount) {
+	case 0:
+		return pair(red, lightGold);
 	case 10:
 		return pair(yellow, lightYellow);
 	case 50:
@@ -90,6 +92,7 @@ BetButton::BetButton(int x, int betAmount) : Button(x, to_string(betAmount)) {
 	this->betAmount = betAmount;
 	radius = 75;
 	color = WHITE;
+	Text = GetBetAmount();
 }
 
 string BetButton::GetBetAmount()
@@ -100,6 +103,7 @@ string BetButton::GetBetAmount()
 void BetButton::Draw(){
 	int offsetX = 15;
 	int offsetY = 10;
+	int size = 30;
 	if (collision()) {
 		color = hoverColor().first;
 	}
@@ -112,7 +116,8 @@ void BetButton::Draw(){
 	if (GetBetAmount().size() == 3) offsetX = 20;
 	if (GetBetAmount() == "200") offsetX = 25;
 	if (GetBetAmount() == "10") offsetX = 12;
-	DrawText(GetBetAmount().c_str(), x - offsetX, y - offsetY, 30, WHITE);
+	if (GetBetAmount() == "0") offsetX = 38,size=25;
+	DrawText(Text.c_str(), x - offsetX, y - offsetY, size, WHITE);
 }
 
 bool BetButton::collision(){
@@ -127,3 +132,10 @@ UndoConfirmButton::UndoConfirmButton(float y,string Text) : Button(y, Text) {
 	x = (GetScreenWidth() - 890) / 2;
 	width = 600;
 }
+
+AllInButton::AllInButton():BetButton((GetScreenWidth()-300)/2,0){
+	radius = 100;
+	Text = "ALL IN";
+	y = GetScreenHeight() / 2 -300;
+}
+

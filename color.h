@@ -11,3 +11,4 @@ const Color red = { 136, 8, 8,255 };
 const Color lightRed = { 220,20,60,255 };
 const Color purple = { 191, 64, 191 ,255 };
 const Color lightPurple = { 255, 0, 255,255 };
+const Color lightGold = { 255, 215, 0,255 };
