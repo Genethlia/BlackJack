@@ -32,6 +32,8 @@ private:
 
 	bool HasEnoughTimePassed(double& lastUpdateTime, double TimePassed);
 	bool roundOver;
+	bool splitHand;
+	bool dealToSplitHand;//For dealing to split hand
 
 	void UpdateDealing(double TimePassed); //Adds cards to player and dealer hands over time
 	void DrawCards();//Draws all cards in a vector
@@ -48,6 +50,7 @@ private:
 	void UpdateBettingButtons();//Updates bets based on button presses
 	void DrawResultText();//Draws the result text
 	void ResetRound();//Resets the game state for a new round
+	void SplitFunc();//Splits the player's hand into two hands
 
 	double LastUpdateTime;//For dealing cards over time
 	double dealerLastUpdateTime;//For dealer drawing cards over time
@@ -56,10 +59,13 @@ private:
 	int money;
 	int bet;
 	int GetScore(const vector<valRank>& hand);//Calculates the score of a hand
+	int GetScoreOfCard(int cardValue);//Calculates the score of a single card
 
 	vector<valRank> playerHand;
+	vector<valRank> playerHandSplit;
 	vector<valRank> cpuHand;
 	vector<Card> playerCards;
+	vector<Card> playerCardsSplit;
 	vector<Card> cpuCards;
 
 	Button hit=Button(100,"HIT");
@@ -81,6 +87,8 @@ private:
 	valRank cpuHiddenCard;
 
 	GameState state = GameState::betting;
+
+	Color resultColor;
 
 	string resultText;
 
