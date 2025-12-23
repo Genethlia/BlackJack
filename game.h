@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <stack>
+#include <queue>
 constexpr int player_Y = 650;
 constexpr int dealer_Y = 50;
 constexpr int cardSpacing = 160;
@@ -12,12 +13,34 @@ inline float screenWidth = 1200;
 inline float screenHeight = 950;
 using namespace std;
 
+enum class ResultStates {
+	None,
+	Win,
+	Lose,
+	Push,
+	Blackjack
+};
+
 enum class GameState{
 	betting,
 	dealing,
 	playerTurn,
 	dealerTurn,
 	roundEnd,
+};
+
+struct PendingDeal {
+	vector<Card>* cards;
+	vector<valRank>* hand;
+	int y;
+};
+
+struct popUpMessage {
+	string message;
+	Color color;
+	double displayTime;
+	double startTime;
+	bool active=false;
 };
 
 class Game {
@@ -32,7 +55,7 @@ private:
 
 	bool HasEnoughTimePassed(double& lastUpdateTime, double TimePassed);
 	bool roundOver;
-	bool splitHand;
+	bool splitHand;//Is split pressed in this round
 	bool dealToSplitHand;//For dealing to split hand
 
 	void UpdateDealing(double TimePassed); //Adds cards to player and dealer hands over time
@@ -43,15 +66,19 @@ private:
 	void DrawUpsideCard();
 	void DrawBetButtons();//Draws the bet buttons
 	void DrawMoneyBets();//Draws the player's money and current bet
-	void HitPlayer();//Adds a card to the player's hand
-	void UpdateButtons();//Updates button states
+	void UpdateButtons(vector<Card>& playerCards, vector<valRank>& playerHand,int y);//Updates button states
 	void cpuGet17();//Dealer draws cards until reaching at least 17
 	void UpdateResults();//Calculates and displays the results of the round
 	void UpdateBettingButtons();//Updates bets based on button presses
 	void DrawResultText();//Draws the result text
 	void ResetRound();//Resets the game state for a new round
 	void SplitFunc();//Splits the player's hand into two hands
+	void QueueHit(vector<Card>& playerCards, vector<valRank>& playerHand, int y);
+	void ProcessDealQueue(double delay);//Processes the pending deal queue
+	void ShowPopUp(string text,Color color,double duration);//Shows messages like "Not enough money"
+	void DrawPopUpMessage();//Draws the popup message if active
 
+	double lastDealTime;//For dealing cards over time
 	double LastUpdateTime;//For dealing cards over time
 	double dealerLastUpdateTime;//For dealer drawing cards over time
 
@@ -60,6 +87,7 @@ private:
 	int bet;
 	int GetScore(const vector<valRank>& hand);//Calculates the score of a hand
 	int GetScoreOfCard(int cardValue);//Calculates the score of a single card
+	int YOfSplitCards = player_Y - 200 - 20;//Y position of split hand cards
 
 	vector<valRank> playerHand;
 	vector<valRank> playerHandSplit;
@@ -89,10 +117,20 @@ private:
 	GameState state = GameState::betting;
 
 	Color resultColor;
+	Color GetresultColor(ResultStates r);//Returns color based on result state
 
-	string resultText;
+	const char* resultText;
+	const char* GetresultText(ResultStates r);//Returns text based on result state
 
 	stack<int> lastBet;
 
 	Deck deck;
+
+	queue<PendingDeal> dealQueue;
+
+	ResultStates ResolveHand(const vector<valRank>& hand, int betAmount);//Resolves a single hand against the dealer's hand
+	ResultStates mainResult = ResultStates::None;
+	ResultStates splitResult = ResultStates::None;
+
+	popUpMessage popUp;
 };
