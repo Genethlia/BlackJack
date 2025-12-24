@@ -5,9 +5,11 @@ Game::Game(){
 	lastDealTime = 0;
 	LastUpdateTime = 0;
 	dealerLastUpdateTime = 0;
+	dealPauseTime = 0;
 	cardsDealtCount = 0;
 	money = 1000;
-	bet = 0;
+	mainBet = 0;
+	splitBet = 0;
 	cpuHiddenCard = {0, 0}; // Initialize to default value
 	resultColor = RED;
 	splitHand = false;
@@ -36,15 +38,14 @@ void Game::Draw() {
 
 void Game::UpdateDealing(double TimePassed){
 		if (HasEnoughTimePassed(LastUpdateTime, TimePassed)) {
-			//valRank xard = deck.DrawCard();
-			valRank xard = { 1,1 };//testing split
+			valRank xard = deck.DrawCard();
+			//valRank xard = { 1,1 };//testing split
 			switch(cardsDealtCount){
 			case 0:
 				playerCards.emplace_back(50,player_Y,xard,&suitImages[xard.rank],&mainFont);
 				playerHand.push_back(xard);
 				break;
 			case 1:
-				//xard = { 10,1 };
 				cpuCards.emplace_back(50, dealer_Y, xard, &suitImages[xard.rank], &mainFont);
 				cpuHand.push_back(xard);
 				break;
@@ -53,12 +54,13 @@ void Game::UpdateDealing(double TimePassed){
 				playerHand.push_back(xard);
 				break;
 			case 3:
-				//xard = { 1,2 };
 				cpuHiddenCard = xard;
 				if (GetScore(cpuHand) + GetScoreOfCard(xard.value) == 21) {
 					cpuCards.emplace_back(210, dealer_Y, xard, &suitImages[xard.rank], &mainFont);
 					cpuHand.push_back(xard);
-					state = GameState::roundEnd;
+					dealPauseTime = GetTime();
+					ShowPopUp("DEALER HIT A BLACKJACK", RED, 3);
+					state = GameState::dealerPause;
 				}
 				else {
 					ShowPopUp("PLAYER'S TURN", WHITE, 3);
@@ -108,7 +110,7 @@ void Game::DrawScore(){
 void Game::DrawButtons(){
 		hit.Draw();
 		stand.Draw();
-		if (bet <= money && state == GameState::playerTurn) {
+		if (mainBet <= money && state == GameState::playerTurn) {
 			Double.Draw();
 			if (playerHand.size() == 2 && GetScoreOfCard(playerHand[0].value) == GetScoreOfCard(playerHand[1].value)) {
 				Split.Draw();
@@ -143,7 +145,7 @@ void Game::DrawMoneyBets(){
 	string mon = (to_string(money) + "$");
 	float spacing = MeasureText(mon.c_str(), 32);
 	DrawTextEx(mainFont, mon.c_str(), { screenWidth - spacing,5 }, 32, 2, WHITE);
-	string be = ("Bet: " + to_string(bet) + "$");
+	string be = ("Bet: " + to_string(mainBet) + "$");
 	spacing = 290;
 	DrawTextEx(mainFont, be.c_str(), { screenWidth-spacing,5 }, 32, 2, WHITE);
 }
@@ -172,6 +174,10 @@ int Game::GetScoreOfCard(int cardValue)
 	if (cardValue >= 10) {
 		return 10;
 	}
+	if (cardValue == 1) {
+		return 11;
+	}
+
 	return cardValue;
 }
 
@@ -192,22 +198,27 @@ void Game::UpdateButtons(vector<Card>& playerCards, vector<valRank>& playerHand,
 				dealerLastUpdateTime = GetTime();
 			}
 			else {
+				ShowPopUp("DEALING TO SPLIT HAND", WHITE, 3);
 				dealToSplitHand = true;
 			}
 		}
-		else if (Double.IsButtonPressed()&&bet<=money) {
-			money -= bet;
-			bet *= 2;
+		else if (stand.IsButtonPressed() && playerHand.size() < 2) {
+			ShowPopUp("YOU MUST HAVE AT LEAST 2 CARDS TO STAND", RED, 3);
+		}
+		else if (Double.IsButtonPressed()&&mainBet<=money) {
+			money -= mainBet;
+			mainBet *= 2;
 			QueueHit(playerCards,playerHand,y);
 			if (!splitHand || dealToSplitHand) {
 				state = GameState::dealerTurn;
 				dealerLastUpdateTime = GetTime();
 			}
 			else {
+				ShowPopUp("DEALING TO SPLIT HAND", WHITE, 3);
 				dealToSplitHand = true;
 			}
 		}
-		else if (Split.IsButtonPressed() && playerHand.size() == 2 && playerHand[0].value == playerHand[1].value&&!splitHand&&bet<=money) {
+		else if (Split.IsButtonPressed() && playerHand.size() == 2 && playerHand[0].value == playerHand[1].value&&!splitHand&&mainBet<=money) {
 			splitHand = true;
 			SplitFunc();
 		}
@@ -215,8 +226,22 @@ void Game::UpdateButtons(vector<Card>& playerCards, vector<valRank>& playerHand,
 }
 
 void Game::cpuGet17(){
-	if (GetScore(cpuHand) >= 17||GetScore(playerHand)>21||(GetScore(playerHand)==21&&playerHand.size()==2)) {
-		state = GameState::roundEnd;
+	bool ShouldTheDealerStand;
+	if (!splitHand) {
+		ShouldTheDealerStand = GetScore(cpuHand) >= 17 || GetScore(playerHand) > 21 || (GetScore(playerHand) == 21 && playerHand.size() == 2);
+	}
+	else {
+		ShouldTheDealerStand = GetScore(cpuHand) >= 17 || ((GetScore(playerHand) > 21 || GetScore(playerHand) == 21 && playerHand.size() == 2) && (GetScore(playerHandSplit) > 21 || GetScore(playerHandSplit) == 21 && playerHandSplit.size() == 2));
+		}
+	if (ShouldTheDealerStand) {
+		if (GetScore(cpuHand) <= 21) {
+			ShowPopUp("DEALER STANDS", WHITE, 3);
+		}
+		else {
+			ShowPopUp("DEALER BUSTED", WHITE, 3);
+		}
+		dealPauseTime = GetTime();
+		state = GameState::dealerPause;
 		return;
 	}
 	if (HasEnoughTimePassed(dealerLastUpdateTime, 0.8)) {
@@ -229,9 +254,9 @@ void Game::cpuGet17(){
 void Game::UpdateResults(){
 	if (roundOver) return;
 
-	mainResult = ResolveHand(playerHand, bet);
+	mainResult = ResolveHand(playerHand, mainBet);
 	if (splitHand) {
-		splitResult = ResolveHand(playerHandSplit, bet);
+		splitResult = ResolveHand(playerHandSplit, splitBet);
 		resultText = "SPLIT RESULTS";
 		resultColor = WHITE;
 	}
@@ -248,12 +273,12 @@ void Game::UpdateBettingButtons()
 		if (betButtons[i].IsButtonPressed()) {
 			int betAmount = betButtons[i].betAmount;
 			if (money >= betAmount) {
-				bet += betAmount;
+				mainBet += betAmount;
 				money -= betAmount;
 				lastBet.push(betAmount);
 			}
 			else if(money!=0){
-				bet += money;
+				mainBet += money;
 				lastBet.push(money);
 				money = 0;
 			}
@@ -261,20 +286,20 @@ void Game::UpdateBettingButtons()
 	}
 	if (undoButton.IsButtonPressed()) {
 		if (!lastBet.empty()) {
-			bet -= lastBet.top();
+			mainBet -= lastBet.top();
 			money += lastBet.top();
 			lastBet.pop();
 		}
 	}
 	if (confirmButton.IsButtonPressed()) {
-		if (bet != 0) {
+		if (mainBet != 0) {
 			state = GameState::dealing;
 			LastUpdateTime = GetTime();
 		}
 	}
 	if (allInButton.IsButtonPressed()) {
 		if (money != 0) {
-			bet += money;
+			mainBet += money;
 			lastBet.push(money);
 			money = 0;
 		}
@@ -308,7 +333,8 @@ void Game::DrawResultText(){
 void Game::ResetRound(){
 	if (GetKeyPressed()) {
 		state = GameState::betting;
-		bet = 0;
+		mainBet = 0;
+		splitBet = 0;
 		while (!lastBet.empty()) {
 			lastBet.pop();
 		}
@@ -316,6 +342,7 @@ void Game::ResetRound(){
 		dealerLastUpdateTime = 0;
 		cardsDealtCount = 0;
 		lastDealTime = 0;
+		dealPauseTime = 0;
 		cpuHiddenCard = { 0, 0 };
 		roundOver = false;
 		splitHand = false;
@@ -339,7 +366,9 @@ void Game::SplitFunc(){
 	playerCards.pop_back();
 	playerHand.pop_back();
 
-	money -= bet;
+	splitBet = mainBet;
+	money -= splitBet;
+
 	lastDealTime = GetTime();
 }
 
@@ -379,7 +408,7 @@ void Game::DrawPopUpMessage(){
 		return;
 	}
 
-	int fontSize = 48;
+	int fontSize = 32;
 	int padding = 20;
 	int textWidth = MeasureText(popUp.message.c_str(), fontSize);
 	int textHeight = fontSize;
@@ -393,7 +422,12 @@ void Game::DrawPopUpMessage(){
 	DrawText(popUp.message.c_str(), x + padding, y + padding, fontSize, Fade(popUp.color, alpha));
 }
 
-
+void Game::DealerPauseUpdate(double duration){
+	if (GetTime() - dealPauseTime > duration) {
+		state = GameState::roundEnd;
+	}
+	return;
+}
 
 Color Game::GetresultColor(ResultStates r)
 {
@@ -472,6 +506,9 @@ void Game::Update(){
 		break;
 	case GameState::dealerTurn:
 		cpuGet17();
+		break;
+	case GameState::dealerPause:
+		DealerPauseUpdate(3);
 		break;
 	case GameState::roundEnd:
 		UpdateResults();

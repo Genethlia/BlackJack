@@ -26,6 +26,7 @@ enum class GameState{
 	dealing,
 	playerTurn,
 	dealerTurn,
+	dealerPause,
 	roundEnd,
 };
 
@@ -77,16 +78,19 @@ private:
 	void ProcessDealQueue(double delay);//Processes the pending deal queue
 	void ShowPopUp(string text,Color color,double duration);//Shows messages like "Not enough money"
 	void DrawPopUpMessage();//Draws the popup message if active
+	void DealerPauseUpdate(double duration);//Updates the dealer pause state
 
 	double lastDealTime;//For dealing cards over time
 	double LastUpdateTime;//For dealing cards over time
 	double dealerLastUpdateTime;//For dealer drawing cards over time
+	double dealPauseTime;//For pausing before showing results
 
 	int cardsDealtCount;
 	int money;
-	int bet;
+	int mainBet;
+	int splitBet;
 	int GetScore(const vector<valRank>& hand);//Calculates the score of a hand
-	int GetScoreOfCard(int cardValue);//Calculates the score of a single card
+	int GetScoreOfCard(int cardValue);//Calculates the score of a single card,do not use for more than two cards with GetScore
 	int YOfSplitCards = player_Y - 200 - 20;//Y position of split hand cards
 
 	vector<valRank> playerHand;
