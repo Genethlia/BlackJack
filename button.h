@@ -6,13 +6,13 @@ using namespace std;
 
 class Button {
 protected:
-    int x, width;
+    int x, width, offsetX;
+    Color color[2] = {darkGreen,tableGreen};;
 private:
     int height;
     string Text; // temporary string to hold the button text
-    char type[10]; // array to hold the text letters
-    int offsetX;
-    int findOffsetX(char type[10]); // function to find the offset for text positioning
+    string type; // array to hold the text letters
+    int findOffsetX(string type); // function to find the offset for text positioning
 public:
     int y;
     Button(int y, string Text);
@@ -45,4 +45,11 @@ private:
 class AllInButton :public BetButton {
 public:
     AllInButton();
+};
+
+class MainMenuButton :public Button {
+public:
+	MainMenuButton(int y, string Text);
+private:
+    int y;
 };

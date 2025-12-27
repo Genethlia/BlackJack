@@ -7,7 +7,8 @@ Game::Game(){
 	dealerLastUpdateTime = 0;
 	dealPauseTime = 0;
 	cardsDealtCount = 0;
-	money = 1000;
+	money = 0;
+	LoadMoney();
 	mainBet = 0;
 	splitBet = 0;
 	cpuHiddenCard = {0, 0}; // Initialize to default value
@@ -26,15 +27,20 @@ Game::Game(){
 }
 
 void Game::Draw() {
+	if (state == GameState::MainMenu) {
+		mainMenu.Draw();
+	}
+	else {
 		DrawBackground();
 		if (state == GameState::betting) DrawBetButtons();
 		else { DrawButtons(); };
-		if(state!=GameState::roundEnd&&state!=GameState::betting) DrawCards();
+		if (state != GameState::roundEnd && state != GameState::betting) DrawCards();
 		DrawScore();
-		if(state==GameState::roundEnd)	DrawResultText();
+		if (state == GameState::roundEnd)	DrawResultText();
 		DrawMoneyBets();
 		DrawPopUpMessage();
 	}
+}
 
 void Game::UpdateDealing(double TimePassed){
 		if (HasEnoughTimePassed(LastUpdateTime, TimePassed)) {
@@ -356,7 +362,7 @@ void Game::ResetRound(){
 		playerHandSplit.clear();
 		ResultStates mainResult = ResultStates::None;
 		ResultStates splitResult = ResultStates::None;
-
+		SaveMoney();
 	}
 }
 
@@ -427,6 +433,28 @@ void Game::DealerPauseUpdate(double duration){
 		state = GameState::roundEnd;
 	}
 	return;
+}
+
+void Game::SaveMoney(){
+	ofstream fin("save.txt");
+	if (fin.is_open()) {
+		fin << money;
+		fin.close();
+	}
+	else {
+		ShowPopUp("Failed To Save Game", RED, 3);
+	}
+}
+
+void Game::LoadMoney(){
+	ifstream fout("save.txt");
+	if (fout.is_open()) {
+		fout >> money;
+		fout.close();
+	}
+	else if(money==0){
+		money = 1000;
+	}
 }
 
 Color Game::GetresultColor(ResultStates r)

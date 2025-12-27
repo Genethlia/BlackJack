@@ -15,7 +15,7 @@ int main() {
 
 		game.Update();
 
-		ClearBackground(WHITE);
+		ClearBackground(BLACK);
 		game.Draw();
 
 		EndDrawing();

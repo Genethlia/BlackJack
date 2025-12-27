@@ -2,10 +2,12 @@
 #include "Card.h"
 #include "deck.h"
 #include "button.h"
+#include "mainMenu.h"
 #include <vector>
 #include <iostream>
 #include <stack>
 #include <queue>
+#include <fstream>
 constexpr int player_Y = 650;
 constexpr int dealer_Y = 50;
 constexpr int cardSpacing = 160;
@@ -22,6 +24,7 @@ enum class ResultStates {
 };
 
 enum class GameState{
+	MainMenu,
 	betting,
 	dealing,
 	playerTurn,
@@ -79,6 +82,8 @@ private:
 	void ShowPopUp(string text,Color color,double duration);//Shows messages like "Not enough money"
 	void DrawPopUpMessage();//Draws the popup message if active
 	void DealerPauseUpdate(double duration);//Updates the dealer pause state
+	void SaveMoney();//Saves the player's money to a file)
+	void LoadMoney();//Loads the player's money from a file
 
 	double lastDealTime;//For dealing cards over time
 	double LastUpdateTime;//For dealing cards over time
@@ -137,4 +142,6 @@ private:
 	ResultStates splitResult = ResultStates::None;
 
 	popUpMessage popUp;
+
+	MainMenu mainMenu;
 };

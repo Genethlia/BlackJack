@@ -145,6 +145,7 @@
     <ClInclude Include="deck.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="images.h" />
+    <ClInclude Include="mainMenu.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="button.cpp" />
@@ -153,6 +154,7 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="images.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="mainMenu.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

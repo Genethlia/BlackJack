@@ -1,6 +1,6 @@
 #include "button.h"
 
-int Button::findOffsetX(char type[10]){
+int Button::findOffsetX(string type){
 
 	int offset = 0;
 
@@ -36,23 +36,14 @@ Button::Button(int y, string Text){
 	this->y = y;
 	width = 280;
 	height = 100;
-	int j = Text.size();
-	for (int i = 0; i < j; i++) {
-		type[i] = Text[i];
-	}
+	type = Text;
 	offsetX = findOffsetX(type);
 }
 
 void Button::Draw(){
-	Color color;
-	if (collision()) {
-		color = tableGreen;
-	}
-	else{
-		color = darkGreen;
-	}
-	DrawRectangle(x, y, width, height, color);
-	DrawText(type, x + offsetX, y + 30, 50, WHITE);
+	int temp = collision();
+	DrawRectangle(x, y, width, height, color[temp]);
+	DrawText(type.c_str(), x + offsetX, y + 30, 50, WHITE);
 }
 
 bool Button::IsButtonPressed(){
@@ -139,3 +130,11 @@ AllInButton::AllInButton():BetButton((GetScreenWidth()-300)/2,0){
 	y = GetScreenHeight() / 2 -300;
 }
 
+MainMenuButton::MainMenuButton(int y, string Text):Button(y,Text){
+	this->y = y;
+	x = 20;
+	offsetX = 5;
+	width = MeasureText(Text.c_str(), 50) + 40;
+	color[0] = BLACK;
+	color[1] = darkGreen;
+}
