@@ -7,8 +7,7 @@ Game::Game(){
 	dealerLastUpdateTime = 0;
 	dealPauseTime = 0;
 	cardsDealtCount = 0;
-	money = 0;
-	LoadMoney();
+	money = 1000;
 	mainBet = 0;
 	splitBet = 0;
 	cpuHiddenCard = {0, 0}; // Initialize to default value
@@ -446,7 +445,7 @@ void Game::SaveMoney(){
 	}
 }
 
-void Game::LoadMoney(){
+void Game::LoadLastGame(){
 	ifstream fout("save.txt");
 	if (fout.is_open()) {
 		fout >> money;
@@ -517,6 +516,23 @@ ResultStates Game::ResolveHand(const vector<valRank>& hand, int betAmount){
 
 void Game::Update(){
 	switch (state) {
+	case GameState::MainMenu:
+		mainMenu.Update();
+		if (mainMenu.placeholder == -1) {
+			break;
+		}
+		else if (mainMenu.placeholder == 0) {
+			state = GameState::betting;
+		}
+		else if (mainMenu.placeholder == 1){
+			state = GameState::betting;
+			mainMenu.placeholder = -1;
+			LoadLastGame(); 
+		}
+		else if (mainMenu.placeholder == 4) {
+			ShouldWindowClose=true;
+		}
+		break;
 	case GameState::betting:
 		UpdateBettingButtons();
 		break;

@@ -10,3 +10,5 @@ bool HasEnoughTimePassed(double& lastUpdateTime, double TimePassed) {
 	}
 	return HasEnoughTimePassed;
 }
+
+bool ShouldWindowClose = false;

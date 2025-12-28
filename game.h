@@ -76,7 +76,7 @@ private:
 	void DrawPopUpMessage();//Draws the popup message if active
 	void DealerPauseUpdate(double duration);//Updates the dealer pause state
 	void SaveMoney();//Saves the player's money to a file)
-	void LoadMoney();//Loads the player's money from a file
+	void LoadLastGame();//Loads the player's money from a file
 
 	double lastDealTime;//For dealing cards over time
 	double LastUpdateTime;//For dealing cards over time

@@ -137,6 +137,7 @@ MainMenuButton::MainMenuButton(int y, string Text):Button(y,Text){
 	width = MeasureText(Text.c_str(), 50) + 40;
 	color[0] = BLACK;
 	color[1] = darkGreen;
+	placeholder = y / 100 - 3;
 }
 
 void MainMenuButton::Draw(){

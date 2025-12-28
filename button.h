@@ -46,6 +46,7 @@ class MainMenuButton :public Button {
 public:
 	MainMenuButton(int y, string Text);
 	void Draw() override;
+    int placeholder;
 private:
     float slideOffset = 0.0f;
 };

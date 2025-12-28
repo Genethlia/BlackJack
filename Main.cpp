@@ -10,7 +10,7 @@ int main() {
 	Game game = Game();
 
 
-	while (!WindowShouldClose()) {
+	while (!WindowShouldClose()&&!ShouldWindowClose) {
 		BeginDrawing();
 
 		game.Update();

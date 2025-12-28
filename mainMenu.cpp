@@ -1,7 +1,7 @@
 #include "mainMenu.h"
 
 MainMenu::MainMenu(){
-
+	placeholder = -1;
 }
 
 void MainMenu::Draw(){
@@ -14,5 +14,19 @@ void MainMenu::Draw(){
 }
 
 void MainMenu::Update(){
-	
+	if (playButton.IsButtonPressed()) {
+		placeholder = playButton.placeholder;
+	}
+	if (resumeButton.IsButtonPressed()) {
+		placeholder = resumeButton.placeholder;
+	}
+	if (settingsButton.IsButtonPressed()) {
+		placeholder = settingsButton.placeholder;
+	}
+	if (exitButton.IsButtonPressed()) {
+		placeholder = exitButton.placeholder;
+	}
+	if (statsButton.IsButtonPressed()) {
+		placeholder = statsButton.placeholder;
+	}
 }

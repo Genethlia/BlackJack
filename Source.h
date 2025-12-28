@@ -11,3 +11,4 @@
 
 bool HasEnoughTimePassed(double& lastUpdateTime, double TimePassed);
 
+extern bool ShouldWindowClose;
