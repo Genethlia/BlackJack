@@ -1,5 +1,5 @@
 #pragma once
-#include <raylib.h>
+#include "Source.h"
 #include "button.h"
 using namespace std;
 class MainMenu {
@@ -9,9 +9,9 @@ public:
 	void Draw();
 	void Update();
 private:
-	MainMenuButton playnewButton = MainMenuButton(400, "PLAY NEW GAME");
+	MainMenuButton playButton = MainMenuButton(300, "PLAY NEW GAME");
 	MainMenuButton settingsButton = MainMenuButton(500, "SETTINGS");
 	MainMenuButton exitButton = MainMenuButton(700, "EXIT");
 	MainMenuButton statsButton = MainMenuButton(600, "STATS");
-	MainMenuButton playsavedButton = MainMenuButton(300, "PLAY SAVED GAME");
+	MainMenuButton resumeButton = MainMenuButton(400, "RESUME  GAME");
 };

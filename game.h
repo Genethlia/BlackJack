@@ -1,13 +1,7 @@
 #pragma once
+#include "Source.h"
 #include "Card.h"
-#include "deck.h"
-#include "button.h"
 #include "mainMenu.h"
-#include <vector>
-#include <iostream>
-#include <stack>
-#include <queue>
-#include <fstream>
 constexpr int player_Y = 650;
 constexpr int dealer_Y = 50;
 constexpr int cardSpacing = 160;
@@ -57,7 +51,6 @@ public:
 	
 private:
 
-	bool HasEnoughTimePassed(double& lastUpdateTime, double TimePassed);
 	bool roundOver;
 	bool splitHand;//Is split pressed in this round
 	bool dealToSplitHand;//For dealing to split hand
@@ -123,7 +116,7 @@ private:
 
 	valRank cpuHiddenCard;
 
-	GameState state = GameState::betting;
+	GameState state = GameState::MainMenu;
 
 	Color resultColor;
 	Color GetresultColor(ResultStates r);//Returns color based on result state

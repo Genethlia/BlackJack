@@ -546,13 +546,3 @@ void Game::Update(){
 		break;
 	}
 }
-
-bool Game::HasEnoughTimePassed(double& lastUpdateTime,double TimePassed){
-	bool HasEnoughTimePassed=false;
-	double CurrentTime = GetTime();
-	if (CurrentTime - lastUpdateTime > TimePassed) {
-		HasEnoughTimePassed = true;
-		lastUpdateTime = CurrentTime;
-	}
-	return HasEnoughTimePassed;
-}

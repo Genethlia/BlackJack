@@ -138,3 +138,21 @@ MainMenuButton::MainMenuButton(int y, string Text):Button(y,Text){
 	color[0] = BLACK;
 	color[1] = darkGreen;
 }
+
+void MainMenuButton::Draw(){
+	bool isHover = collision();
+
+	float targetOffset = isHover ? 25.0f : 0.0f;//If hover, slide to 25, else slide back to 0(fancy way to write an if statement)
+	slideOffset = Lerp(slideOffset, targetOffset, 0.2f);
+
+	DrawRectangle(x, y, width, height, color[isHover]);
+	DrawText(type.c_str(), x + offsetX + slideOffset, y + 30, 50, WHITE);
+	//DrawRectangleLines(x, y, width, height, RED);
+
+	if (isHover) {
+		float centerX = x + 15;
+		float centerY = y + height / 2+4;
+		float radius = 10;
+		DrawPoly({ centerX, centerY }, 3, radius, 0, WHITE);
+	}
+}

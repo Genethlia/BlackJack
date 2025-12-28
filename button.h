@@ -1,17 +1,14 @@
 #pragma once
-#include <string>
-#include <raylib.h>
-#include "color.h"
+#include "Source.h"
 using namespace std;
 
 class Button {
 protected:
-    int x, width, offsetX;
-    Color color[2] = {darkGreen,tableGreen};;
+    int x, width, offsetX, height;
+    Color color[2] = {darkGreen,tableGreen};
+    string type; // string to hold the text letters
 private:
-    int height;
     string Text; // temporary string to hold the button text
-    string type; // array to hold the text letters
     int findOffsetX(string type); // function to find the offset for text positioning
 public:
     int y;
@@ -38,8 +35,6 @@ public:
 class UndoConfirmButton :public Button {
 public:
     UndoConfirmButton(float y,string Text);
-private:
-    float y;
 };
 
 class AllInButton :public BetButton {
@@ -50,6 +45,7 @@ public:
 class MainMenuButton :public Button {
 public:
 	MainMenuButton(int y, string Text);
+	void Draw() override;
 private:
-    int y;
+    float slideOffset = 0.0f;
 };

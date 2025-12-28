@@ -1,8 +1,8 @@
 #pragma once
-#include <raylib.h>
-#include "images.h"
+#include "Source.h"
+#include "Images.h"
 #include "deck.h"
-#include <string>
+
 using namespace std;
 
 class Card {
