@@ -56,14 +56,10 @@ Run the Game
   Closest to 21 without going over wins
 
 🚧 Roadmap / Work in Progress
-
-  Betting system
   
   Animations & effects
   
   Sound effects
-  
-  Multiple decks
   
   Menu & restart screen
   
