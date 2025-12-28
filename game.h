@@ -54,6 +54,7 @@ private:
 	bool roundOver;
 	bool splitHand;//Is split pressed in this round
 	bool dealToSplitHand;//For dealing to split hand
+	bool surrendered;//Has the player surrendered this round
 
 	void UpdateDealing(double TimePassed); //Adds cards to player and dealer hands over time
 	void DrawCards();//Draws all cards in a vector
@@ -75,7 +76,7 @@ private:
 	void ShowPopUp(string text,Color color,double duration);//Shows messages like "Not enough money"
 	void DrawPopUpMessage();//Draws the popup message if active
 	void DealerPauseUpdate(double duration);//Updates the dealer pause state
-	void SaveMoney();//Saves the player's money to a file)
+	void SaveGame();//Saves the player's money to a file)
 	void LoadLastGame();//Loads the player's money from a file
 
 	double lastDealTime;//For dealing cards over time
@@ -98,10 +99,11 @@ private:
 	vector<Card> playerCardsSplit;
 	vector<Card> cpuCards;
 
-	Button hit=Button(100,"HIT");
-	Button stand = Button(250, "STAND");
-	Button Double = Button(400, "DOUBLE");
-	Button Split = Button(550, "SPLIT");
+	Button hit=Button(60,"HIT");
+	Button stand = Button(210, "STAND");
+	Button Double = Button(510, "DOUBLE");
+	Button Split = Button(660, "SPLIT");
+	Button Surrender = Button(360, "GIVE UP");
 
 	BetButton betButtons[4] = { BetButton(150,10),BetButton(350,50),BetButton(550,100),BetButton(750,200) };
 	AllInButton allInButton = AllInButton();

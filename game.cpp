@@ -14,6 +14,7 @@ Game::Game(){
 	resultColor = RED;
 	splitHand = false;
 	dealToSplitHand = false;
+	surrendered = false;
 
 	for (int i = 0; i < 4; i++) suitImages[i].LoadSuit(i);
 	gameImage.LoadMatAndHiddenCard();
@@ -108,13 +109,14 @@ void Game::DrawScore(){
 	int cpuScore = GetScore(cpuHand);
 	string playerScoreText = Text + to_string(playerScore);
 	string cpuScoreText = "Dealer Score: " + to_string(cpuScore);
-	DrawText(playerScoreText.c_str(), 910, 810, size, WHITE);
-	DrawText(cpuScoreText.c_str(), 910, 730, 32, WHITE);
+	DrawText(playerScoreText.c_str(), 915, 890, size, WHITE);
+	DrawText(cpuScoreText.c_str(), 915, 810, 32, WHITE);
 }
 
 void Game::DrawButtons(){
 		hit.Draw();
 		stand.Draw();
+		Surrender.Draw();
 		if (mainBet <= money && state == GameState::playerTurn) {
 			Double.Draw();
 			if (playerHand.size() == 2 && GetScoreOfCard(playerHand[0].value) == GetScoreOfCard(playerHand[1].value)) {
@@ -210,6 +212,24 @@ void Game::UpdateButtons(vector<Card>& playerCards, vector<valRank>& playerHand,
 		else if (stand.IsButtonPressed() && playerHand.size() < 2) {
 			ShowPopUp("YOU MUST HAVE AT LEAST 2 CARDS TO STAND", RED, 3);
 		}
+		else if (Surrender.IsButtonPressed()) {
+			if (playerHand.size() != 2) {
+				ShowPopUp("YOU CAN ONLY SURRENDER WITH 2 CARDS", RED, 3);
+			}
+			else if (splitHand) {
+				ShowPopUp("YOU CANNOT SURRENDER AFTER SPLITTING", RED, 3);
+			}
+			else {
+				surrendered = true;
+				money += mainBet / 2;
+				ShowPopUp("YOU SURRENDERED, HALF YOUR BET HAS BEEN RETURNED", WHITE, 3);
+				state = GameState::dealerPause;
+				dealPauseTime = GetTime();
+				Card card(210, dealer_Y, cpuHiddenCard, &suitImages[cpuHiddenCard.rank], &mainFont);
+				cpuCards.push_back(card);
+				cpuHand.push_back(cpuHiddenCard);
+			}
+		}
 		else if (Double.IsButtonPressed()&&mainBet<=money) {
 			money -= mainBet;
 			mainBet *= 2;
@@ -223,7 +243,7 @@ void Game::UpdateButtons(vector<Card>& playerCards, vector<valRank>& playerHand,
 				dealToSplitHand = true;
 			}
 		}
-		else if (Split.IsButtonPressed() && playerHand.size() == 2 && playerHand[0].value == playerHand[1].value&&!splitHand&&mainBet<=money) {
+		else if (Split.IsButtonPressed() && playerHand.size() == 2 && GetScoreOfCard(playerHand[0].value)==GetScoreOfCard(playerHand[1].value) && !splitHand && mainBet <= money) {
 			splitHand = true;
 			SplitFunc();
 		}
@@ -258,16 +278,21 @@ void Game::cpuGet17(){
 
 void Game::UpdateResults(){
 	if (roundOver) return;
-
-	mainResult = ResolveHand(playerHand, mainBet);
-	if (splitHand) {
-		splitResult = ResolveHand(playerHandSplit, splitBet);
-		resultText = "SPLIT RESULTS";
-		resultColor = WHITE;
+	if (!surrendered) {
+		mainResult = ResolveHand(playerHand, mainBet);
+		if (splitHand) {
+			splitResult = ResolveHand(playerHandSplit, splitBet);
+			resultText = "SPLIT RESULTS";
+			resultColor = WHITE;
+		}
+		else {
+			resultText = GetresultText(mainResult);
+			resultColor = GetresultColor(mainResult);
+		}
 	}
 	else {
-		resultText = GetresultText(mainResult);
-		resultColor = GetresultColor(mainResult);
+		resultText = "YOU GAVE UP";
+		resultColor = RED;
 	}
 	roundOver = true;
 }
@@ -315,7 +340,7 @@ void Game::DrawResultText(){
 		const char* PlayAgain = "Press any key to play again";
 		int x = (screenWidth-300) / 2;
 		int y = (screenHeight-350) / 2;
-		int fontSize = 128;
+		int fontSize = 116;
 		int TextWidth = MeasureText(resultText, fontSize);
 		int positionX = x - TextWidth / 2;
 		int otherpositionX = x - TextWidth / 2 + 80;
@@ -352,6 +377,7 @@ void Game::ResetRound(){
 		roundOver = false;
 		splitHand = false;
 		dealToSplitHand = false;
+		surrendered = false;
 		resultText="";
 		cpuHand.clear();
 		cpuCards.clear();
@@ -361,7 +387,7 @@ void Game::ResetRound(){
 		playerHandSplit.clear();
 		ResultStates mainResult = ResultStates::None;
 		ResultStates splitResult = ResultStates::None;
-		SaveMoney();
+		SaveGame();
 	}
 }
 
@@ -413,7 +439,7 @@ void Game::DrawPopUpMessage(){
 		return;
 	}
 
-	int fontSize = 32;
+	int fontSize = 24;
 	int padding = 20;
 	int textWidth = MeasureText(popUp.message.c_str(), fontSize);
 	int textHeight = fontSize;
@@ -434,10 +460,20 @@ void Game::DealerPauseUpdate(double duration){
 	return;
 }
 
-void Game::SaveMoney(){
+void Game::SaveGame(){
 	ofstream fin("save.txt");
 	if (fin.is_open()) {
-		fin << money;
+		fin << money<<endl;
+		fin << playerHand.size()<<endl;
+		for (int i = 0; i < playerHand.size(); i++) {
+			fin << playerHand[i].value<<" "<<playerHand[i].rank<<" ";
+		}
+		fin << endl;
+		fin << cpuHand.size()<<endl;
+		for (int i = 0; i < cpuHand.size(); i++) {
+			fin << cpuHand[i].value << " " << cpuHand[i].rank << " ";
+		}
+		fin << endl;
 		fin.close();
 	}
 	else {
@@ -449,6 +485,22 @@ void Game::LoadLastGame(){
 	ifstream fout("save.txt");
 	if (fout.is_open()) {
 		fout >> money;
+		int playerHandSize;
+		fout >> playerHandSize;
+		for (int i = 0; i < playerHandSize; i++) {
+			valRank card;
+			fout >> card.value >> card.rank;
+			playerHand.push_back(card);
+			playerCards.emplace_back(50 + i * cardSpacing, player_Y, card, &suitImages[card.rank], &mainFont);
+		}
+		int cpuHandSize;
+		fout >> cpuHandSize;
+		for (int i = 0; i < cpuHandSize; i++) {
+			valRank card;
+			fout >> card.value >> card.rank;
+			cpuHand.push_back(card);
+			cpuCards.emplace_back(50 + i * cardSpacing, dealer_Y, card, &suitImages[card.rank], &mainFont);
+		}
 		fout.close();
 	}
 	else if(money==0){

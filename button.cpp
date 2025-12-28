@@ -9,7 +9,7 @@ int Button::findOffsetX(string type){
 		if (type[1] == 'T') {
 			offset = 50;
 		}
-		else {
+		else{
 			offset = 65;
 		}
 		break;
@@ -24,6 +24,9 @@ int Button::findOffsetX(string type){
 		break;
 	case 'C':
 		offset = 120;
+		break;
+	case 'G':
+		offset = 35;
 		break;
 	default:
 		break;
