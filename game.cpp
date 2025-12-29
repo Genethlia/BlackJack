@@ -387,6 +387,7 @@ void Game::ResetRound(){
 		playerHandSplit.clear();
 		ResultStates mainResult = ResultStates::None;
 		ResultStates splitResult = ResultStates::None;
+		mainMenu.placeholder = -1;
 		SaveGame();
 	}
 }
@@ -474,6 +475,13 @@ void Game::SaveGame(){
 			fin << cpuHand[i].value << " " << cpuHand[i].rank << " ";
 		}
 		fin << endl;
+		if (state != GameState::roundEnd) {
+			fin << int(state);
+		}
+		else {
+			fin << int(GameState::betting);
+		}
+		fin << endl;
 		fin.close();
 	}
 	else {
@@ -502,9 +510,7 @@ void Game::LoadLastGame(){
 			cpuCards.emplace_back(50 + i * cardSpacing, dealer_Y, card, &suitImages[card.rank], &mainFont);
 		}
 		fout.close();
-	}
-	else if(money==0){
-		money = 1000;
+		cardsDealtCount = playerHandSize + cpuHandSize;
 	}
 }
 
@@ -578,7 +584,6 @@ void Game::Update(){
 		}
 		else if (mainMenu.placeholder == 1){
 			state = GameState::betting;
-			mainMenu.placeholder = -1;
 			LoadLastGame(); 
 		}
 		else if (mainMenu.placeholder == 4) {
