@@ -78,6 +78,8 @@ private:
 	void DealerPauseUpdate(double duration);//Updates the dealer pause state
 	void SaveGame();//Saves the player's money to a file)
 	void LoadLastGame();//Loads the player's money from a file
+	void DrawHomeButton();//Draws the home button
+	void UpdateHomeButton();//Updates the home button(Should be called in every frame when not in mainMenu)
 
 	double lastDealTime;//For dealing cards over time
 	double LastUpdateTime;//For dealing cards over time
@@ -139,4 +141,6 @@ private:
 	popUpMessage popUp;
 
 	MainMenu mainMenu;
+
+	HomeButton homeButton = HomeButton();
 };

@@ -31,7 +31,7 @@ void Images::LoadSuit(int rank) {
 
 		UnloadImage(image);
 	}
-void Images::LoadMatAndHiddenCard() {
+void Images::LoadMatHiddenCardAndHome() {
 		// mat and hidden card images for the table
 		mat = LoadImage("Images/mat.jpg");
 		ImageResize(&mat, 1200, 950);
@@ -42,6 +42,11 @@ void Images::LoadMatAndHiddenCard() {
 		ImageResize(&mat, 180, 250);
 		hiddenCardTexture = LoadTextureFromImage(mat);
 		UnloadImage(mat);
+
+		mat = LoadImage("Images/home.png");
+		ImageResize(&mat, 50, 50);
+		mainMenuhomeTexture = LoadTextureFromImage(mat);
+		UnloadImage(mat);
 }
 
 
@@ -51,6 +56,7 @@ void Images::UnloadAll(){
 	if (bigfiliTexture.id != 0) UnloadTexture(bigfiliTexture);
 	if (matTexture.id != 0) UnloadTexture(matTexture);
 	if (hiddenCardTexture.id != 0) UnloadTexture(hiddenCardTexture);
+	if (mainMenuhomeTexture.id != 0) UnloadTexture(mainMenuhomeTexture);
 }
 
 Images::~Images(){

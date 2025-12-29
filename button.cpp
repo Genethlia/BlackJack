@@ -34,13 +34,15 @@ int Button::findOffsetX(string type){
 	return offset;
 }
 
-Button::Button(int y, string Text){
+Button::Button(int y, string Text) {
 	x = 910;
 	this->y = y;
 	width = 280;
 	height = 100;
 	type = Text;
-	offsetX = findOffsetX(type);
+	if (!Text.empty()) {
+		offsetX = findOffsetX(type);
+	}
 }
 
 void Button::Draw(){
@@ -159,4 +161,13 @@ void MainMenuButton::Draw(){
 		float radius = 10;
 		DrawPoly({ centerX, centerY }, 3, radius, 0, WHITE);
 	}
+}
+
+HomeButton::HomeButton():Button(5,"") {
+	x = 895 - 50;
+	width = 50;
+	height = 50;
+	offsetX = 5;
+	color[0] = transparent;
+	color[1] = WHITE;
 }

@@ -50,3 +50,8 @@ public:
 private:
     float slideOffset = 0.0f;
 };
+
+class HomeButton :public Button {
+public:
+    HomeButton();
+};

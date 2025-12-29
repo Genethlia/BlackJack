@@ -17,7 +17,7 @@ Game::Game(){
 	surrendered = false;
 
 	for (int i = 0; i < 4; i++) suitImages[i].LoadSuit(i);
-	gameImage.LoadMatAndHiddenCard();
+	gameImage.LoadMatHiddenCardAndHome();
 	mainFont = LoadFontEx("Fonts/ComSuns.ttf", 64, 0, 0);
 
 	roundOver = false;
@@ -32,6 +32,7 @@ void Game::Draw() {
 	}
 	else {
 		DrawBackground();
+		DrawHomeButton();
 		if (state == GameState::betting) DrawBetButtons();
 		else { DrawButtons(); };
 		if (state != GameState::roundEnd && state != GameState::betting) DrawCards();
@@ -95,21 +96,23 @@ void Game::DrawCards(){
 void Game::DrawScore(){
 	string Text;
 	int size = 32;
+	int YofScore=865;
 	if (!splitHand) {
 		Text = "Player Score: ";
+		YofScore = 880;
 	}
 	else {
 		size = 24;
 		Text = "First Hand Score: ";
 		int splitScore = GetScore(playerHandSplit);
 		string splitScoreText = "Second Hand Score: " + to_string(splitScore);
-		DrawText(splitScoreText.c_str(), 910, 880, size, WHITE);
+		DrawText(splitScoreText.c_str(), 915, 910, size, WHITE);
 	}
 	int playerScore = GetScore(playerHand);
 	int cpuScore = GetScore(cpuHand);
 	string playerScoreText = Text + to_string(playerScore);
 	string cpuScoreText = "Dealer Score: " + to_string(cpuScore);
-	DrawText(playerScoreText.c_str(), 915, 890, size, WHITE);
+	DrawText(playerScoreText.c_str(), 915, YofScore, size, WHITE);
 	DrawText(cpuScoreText.c_str(), 915, 810, 32, WHITE);
 }
 
@@ -334,6 +337,7 @@ void Game::UpdateBettingButtons()
 			money = 0;
 		}
 	}
+	UpdateHomeButton();
 }
 
 void Game::DrawResultText(){
@@ -388,7 +392,6 @@ void Game::ResetRound(){
 		ResultStates mainResult = ResultStates::None;
 		ResultStates splitResult = ResultStates::None;
 		mainMenu.placeholder = -1;
-		SaveGame();
 	}
 }
 
@@ -482,6 +485,9 @@ void Game::SaveGame(){
 			fin << int(GameState::betting);
 		}
 		fin << endl;
+		fin << mainBet<<endl;
+		fin << splitHand << endl;
+		fin << splitBet << endl;
 		fin.close();
 	}
 	else {
@@ -493,25 +499,60 @@ void Game::LoadLastGame(){
 	ifstream fout("save.txt");
 	if (fout.is_open()) {
 		fout >> money;
-		int playerHandSize;
-		fout >> playerHandSize;
-		for (int i = 0; i < playerHandSize; i++) {
-			valRank card;
-			fout >> card.value >> card.rank;
-			playerHand.push_back(card);
-			playerCards.emplace_back(50 + i * cardSpacing, player_Y, card, &suitImages[card.rank], &mainFont);
+		if (state != GameState::betting) {
+			int playerHandSize;
+			fout >> playerHandSize;
+			for (int i = 0; i < playerHandSize; i++) {
+				valRank card;
+				fout >> card.value >> card.rank;
+				playerHand.push_back(card);
+				playerCards.emplace_back(50 + i * cardSpacing, player_Y, card, &suitImages[card.rank], &mainFont);
+			}
+			int cpuHandSize;
+			fout >> cpuHandSize;
+			for (int i = 0; i < cpuHandSize; i++) {
+				valRank card;
+				fout >> card.value >> card.rank;
+				cpuHand.push_back(card);
+				cpuCards.emplace_back(50 + i * cardSpacing, dealer_Y, card, &suitImages[card.rank], &mainFont);
+			}
+			cardsDealtCount = playerHandSize + cpuHandSize;
+
+			int Gamestate;
+			fout >> Gamestate;
+			state = GameState(Gamestate);
+
+			int bet;
+
+			fout >> bet;
+			mainBet = bet;
+
+			bool IsSplitActive;
+			fout >> IsSplitActive;
+			splitHand = IsSplitActive;
+
+			if (splitHand) {
+				fout >> bet;
+				splitBet = bet;
+			}
 		}
-		int cpuHandSize;
-		fout >> cpuHandSize;
-		for (int i = 0; i < cpuHandSize; i++) {
-			valRank card;
-			fout >> card.value >> card.rank;
-			cpuHand.push_back(card);
-			cpuCards.emplace_back(50 + i * cardSpacing, dealer_Y, card, &suitImages[card.rank], &mainFont);
-		}
+
 		fout.close();
-		cardsDealtCount = playerHandSize + cpuHandSize;
 	}
+}
+
+void Game::DrawHomeButton(){
+	homeButton.Draw();
+	DrawTexture(gameImage.mainMenuhomeTexture, 895 - gameImage.mainMenuhomeTexture.width, 5, WHITE);
+}
+
+void Game::UpdateHomeButton(){
+	if (homeButton.IsButtonPressed()) {
+		SaveGame();
+		mainMenu.placeholder = -1;
+		state = GameState::MainMenu;
+	}
+	return;
 }
 
 Color Game::GetresultColor(ResultStates r)
@@ -583,7 +624,6 @@ void Game::Update(){
 			state = GameState::betting;
 		}
 		else if (mainMenu.placeholder == 1){
-			state = GameState::betting;
 			LoadLastGame(); 
 		}
 		else if (mainMenu.placeholder == 4) {
@@ -595,6 +635,7 @@ void Game::Update(){
 		break;
 	case GameState::dealing:
 		UpdateDealing(0.8);
+		UpdateHomeButton();
 		break;
 	case GameState::playerTurn:
 		if (!dealToSplitHand) {
@@ -604,9 +645,11 @@ void Game::Update(){
 			UpdateButtons(playerCardsSplit, playerHandSplit,YOfSplitCards);
 		}
 		ProcessDealQueue(0.8);
+		UpdateHomeButton();
 		break;
 	case GameState::dealerTurn:
 		cpuGet17();
+		UpdateHomeButton();
 		break;
 	case GameState::dealerPause:
 		DealerPauseUpdate(3);
@@ -614,6 +657,7 @@ void Game::Update(){
 	case GameState::roundEnd:
 		UpdateResults();
 		ResetRound();
+		SaveGame();
 		break;
 	default:
 		break;

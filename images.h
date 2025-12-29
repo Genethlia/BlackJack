@@ -8,11 +8,12 @@ public:
 
 	void UnloadAll();
 	void LoadSuit(int rank);
-	void LoadMatAndHiddenCard();
+	void LoadMatHiddenCardAndHome();
 
 	Texture filiTexture, bigfiliTexture;//Textures for small and big suit images
 	Texture matTexture;//Table mat texture
 	Texture hiddenCardTexture;
+	Texture mainMenuhomeTexture;//Main menu home texture
 private:
 	Image image;//Temporary image holder
 	Image mat;//Table mat image
