@@ -465,7 +465,7 @@ void Game::DealerPauseUpdate(double duration){
 void Game::SaveGame(){
 
 	fs::path folder("saves");
-	if (fs::exists(folder)) fs::create_directories(folder);
+	if (!fs::exists(folder)) fs::create_directories(folder);
 
 	deck.SaveDeck();
 	ofstream fout("saves/save.txt");
