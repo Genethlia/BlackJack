@@ -361,7 +361,6 @@ void Game::DrawResultText(){
 }
 
 void Game::ResetRound(){
-	if (GetKeyPressed()) {
 		state = GameState::betting;
 		mainBet = 0;
 		splitBet = 0;
@@ -385,7 +384,6 @@ void Game::ResetRound(){
 		ResultStates mainResult = ResultStates::None;
 		ResultStates splitResult = ResultStates::None;
 		mainMenu.placeholder = -1;
-	}
 }
 
 void Game::StartRound(){
@@ -463,10 +461,11 @@ void Game::DealerPauseUpdate(double duration){
 }
 
 void Game::SaveGame(){
-
-	fs::path folder("saves");
-	if (!fs::exists(folder)) fs::create_directories(folder);
-
+	fs::path filename("saves/save.txt");
+	fs::path folder=filename.parent_path();
+	if (!folder.empty() && !fs::exists(folder)) {
+		fs::create_directories(folder);
+	}
 	deck.SaveDeck();
 	ofstream fout("saves/save.txt");
 	if (fout.is_open()) {
@@ -718,7 +717,9 @@ void Game::Update(){
 		break;
 	case GameState::roundEnd:
 		UpdateResults();
-		ResetRound();
+		if (GetKeyPressed()) {
+			ResetRound();
+		}
 		break;
 	default:
 		break;

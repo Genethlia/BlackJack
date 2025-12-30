@@ -1,4 +1,4 @@
-Money: 1150
+Money: 1000
 State: 1
 MainBet: 0
 LastBetSize: 0
