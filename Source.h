@@ -7,7 +7,9 @@
 #include <queue>
 #include <fstream>
 #include <string>
+#include <filesystem>
 #include "color.h"
+namespace fs = std::filesystem;
 
 bool HasEnoughTimePassed(double& lastUpdateTime, double TimePassed);
 

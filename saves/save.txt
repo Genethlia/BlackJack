@@ -1,0 +1,16 @@
+Money: 1150
+State: 1
+MainBet: 0
+LastBetSize: 0
+PlayerHandSize: 0
+PlayerHand: 
+DealerHandSize: 0
+DealerHand: 
+DealerHiddenCard: 0 0
+CardsDealt: 0
+IsRoundOver: 0
+IsSplitEnabledThisRound? 0
+SplitHandSize: 0
+SplitHand: 
+SplitBet: 0
+ShouldYouDealToSplitHand: 0

@@ -5,7 +5,6 @@
 Deck::Deck(){
     srand(static_cast<unsigned>(time(nullptr)));
     cards=RandomizeDeck();
-    deckSize = 52;
 }
 
 vector<valRank> Deck::CreateDeck(){
@@ -32,7 +31,7 @@ vector<valRank> Deck::RandomizeDeck(){
 }
 
 void Deck::Draw() {
-    for (int i = 0; i < deckSize; i++) {
+    for (int i = 0; i < cards.size(); i++) {
         cout << cards[i].value << " " << cards[i].rank << endl;
     }
 }
@@ -40,10 +39,31 @@ void Deck::Draw() {
 valRank Deck::DrawCard(){
     if (cards.empty()) {
         cards = RandomizeDeck();
-        deckSize = 52;
     }
-    valRank temp = cards[deckSize - 1];
+    valRank temp = cards[cards.size() - 1];
     cards.pop_back();
-    deckSize--;
     return temp;
+}
+
+void Deck::SaveDeck(){
+
+    ofstream fout("saves/deck.txt");
+    if (fout.is_open()) {
+        for (auto &card : cards) {
+            fout << card.value << " " << card.rank << endl;
+        }
+    }
+    fout.close();
+}
+
+void Deck::LoadDeck(){
+    ifstream fin("saves/deck.txt");
+    if (fin.is_open()) {
+        cards.clear();
+        valRank temp;
+        while (fin >> temp.value >> temp.rank) {
+            cards.push_back(temp);
+        }
+    }
+    fin.close();
 }

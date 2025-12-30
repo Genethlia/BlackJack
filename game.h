@@ -41,6 +41,16 @@ struct popUpMessage {
 	bool active=false;
 };
 
+struct Timers {
+	double cardDealStart=0.0;//For dealing cards over time
+	double animationStart=0.0;//For dealing cards over time
+	double dealerTurnStart=0.0;//For dealer drawing cards over time
+	double resultPauseStart=0.0;//For pausing before showing results
+
+	void ResetTimers();
+	void SetAllTimersToNow();
+};
+
 class Game {
 public:
 
@@ -48,6 +58,7 @@ public:
 
 	void Draw();//All the drawing functions
 	void Update();//All the update functions
+	void SaveGame();//Saves the player's money to a file
 	
 private:
 
@@ -70,21 +81,18 @@ private:
 	void UpdateBettingButtons();//Updates bets based on button presses
 	void DrawResultText();//Draws the result text
 	void ResetRound();//Resets the game state for a new round
+	void StartRound();//Starts new round
 	void SplitFunc();//Splits the player's hand into two hands
 	void QueueHit(vector<Card>& playerCards, vector<valRank>& playerHand, int y);
 	void ProcessDealQueue(double delay);//Processes the pending deal queue
 	void ShowPopUp(string text,Color color,double duration);//Shows messages like "Not enough money"
 	void DrawPopUpMessage();//Draws the popup message if active
 	void DealerPauseUpdate(double duration);//Updates the dealer pause state
-	void SaveGame();//Saves the player's money to a file)
 	void LoadLastGame();//Loads the player's money from a file
 	void DrawHomeButton();//Draws the home button
 	void UpdateHomeButton();//Updates the home button(Should be called in every frame when not in mainMenu)
 
-	double lastDealTime;//For dealing cards over time
-	double LastUpdateTime;//For dealing cards over time
-	double dealerLastUpdateTime;//For dealer drawing cards over time
-	double dealPauseTime;//For pausing before showing results
+	Timers timers;
 
 	int cardsDealtCount;
 	int money;
