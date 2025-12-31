@@ -34,11 +34,11 @@ struct PendingDeal {
 };
 
 struct popUpMessage {
-	string message;
-	Color color;
-	double displayTime;
-	double startTime;
-	bool active=false;
+	string message = " ";
+	Color color = WHITE;
+	double displayTime = 0.0;
+	double startTime = 0.0;
+	bool active = false;
 };
 
 struct Timers {
@@ -49,6 +49,13 @@ struct Timers {
 
 	void ResetTimers();
 	void SetAllTimersToNow();
+};
+
+struct Hand {
+	vector<valRank> cards;
+	vector<Card> visual;
+	int bet = 0;
+	bool finished = false;
 };
 
 class Game {
@@ -75,7 +82,7 @@ private:
 	void DrawUpsideCard();
 	void DrawBetButtons();//Draws the bet buttons
 	void DrawMoneyBets();//Draws the player's money and current bet
-	void UpdateButtons(vector<Card>& playerCards, vector<valRank>& playerHand,int y);//Updates button states
+	void UpdateButtons(Hand player,int y);//Updates button states
 	void cpuGet17();//Dealer draws cards until reaching at least 17
 	void UpdateResults();//Calculates and displays the results of the round
 	void UpdateBettingButtons();//Updates bets based on button presses
@@ -96,17 +103,13 @@ private:
 
 	int cardsDealtCount;
 	int money;
-	int mainBet;
-	int splitBet;
 	int GetScore(const vector<valRank>& hand);//Calculates the score of a hand
 	int GetScoreOfCard(int cardValue);//Calculates the score of a single card,do not use for more than two cards with GetScore
 	int YOfSplitCards = player_Y - 200 - 20;//Y position of split hand cards
 
-	vector<valRank> playerHand;
-	vector<valRank> playerHandSplit;
+	Hand playerMain;
+	Hand playerSplit;
 	vector<valRank> cpuHand;
-	vector<Card> playerCards;
-	vector<Card> playerCardsSplit;
 	vector<Card> cpuCards;
 
 	Button hit=Button(60,"HIT");
@@ -142,7 +145,7 @@ private:
 
 	queue<PendingDeal> dealQueue;
 
-	ResultStates ResolveHand(const vector<valRank>& hand, int betAmount);//Resolves a single hand against the dealer's hand
+	ResultStates ResolveHand(Hand hand);//Resolves a single hand against the dealer's hand
 	ResultStates mainResult = ResultStates::None;
 	ResultStates splitResult = ResultStates::None;
 
