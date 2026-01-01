@@ -9,6 +9,7 @@
 #include <string>
 #include <filesystem>
 #include "color.h"
+#include "images.h"
 namespace fs = std::filesystem;
 
 bool HasEnoughTimePassed(double& lastUpdateTime, double TimePassed);

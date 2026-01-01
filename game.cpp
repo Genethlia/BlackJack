@@ -18,6 +18,7 @@ Game::Game(){
 
 	resultText = "";
 
+	dealerHiddenVisual = nullptr;
 }
 
 void Game::Draw() {
@@ -37,33 +38,43 @@ void Game::Draw() {
 	}
 }
 
+bool Game::CardsAreMoving(){
+	for (auto& c : playerMain.visual) if (c.IsMoving()) return true;
+	for (auto& c : playerSplit.visual) if (c.IsMoving()) return true;
+	for (auto& c : cpuCards) if (c.IsMoving()) return true;
+	if (dealerHiddenVisual) if (dealerHiddenVisual->IsMoving()) return true;
+	return false;
+}
+
 void Game::UpdateDealing(double TimePassed){
 		if (HasEnoughTimePassed(timers.animationStart, TimePassed)) {
 			valRank xard = deck.DrawCard();
 			//valRank xard = { 1,1 };//testing split
 			switch(cardsDealtCount){
 			case 0:
-				playerMain.visual.emplace_back(50,player_Y,xard,&suitImages[xard.rank],&mainFont);
+				playerMain.visual.emplace_back(50,player_Y,xard,&suitImages[xard.rank],&mainFont,&gameImage);
 				playerMain.cards.push_back(xard);
 				break;
 			case 1:
-				cpuCards.emplace_back(50, dealer_Y, xard, &suitImages[xard.rank], &mainFont);
+				cpuCards.emplace_back(50, dealer_Y, xard, &suitImages[xard.rank], &mainFont,&gameImage);
 				cpuHand.push_back(xard);
 				break;
 			case 2:
-				playerMain.visual.emplace_back(210, player_Y, xard, &suitImages[xard.rank], &mainFont);
+				playerMain.visual.emplace_back(210, player_Y, xard, &suitImages[xard.rank], &mainFont,&gameImage);
 				playerMain.cards.push_back(xard);
 				break;
 			case 3:
 				cpuHiddenCard = xard;
 				if (GetScore(cpuHand) + GetScoreOfCard(xard.value) == 21) {
-					cpuCards.emplace_back(210, dealer_Y, xard, &suitImages[xard.rank], &mainFont);
+					cpuCards.emplace_back(210, dealer_Y, xard, &suitImages[xard.rank], &mainFont,&gameImage);
 					cpuHand.push_back(xard);
 					timers.resultPauseStart = GetTime();
 					ShowPopUp("DEALER HIT A BLACKJACK", RED, 3);
 					state = GameState::dealerPause;
 				}
 				else {
+					dealerHiddenVisual = new Card(180, 27, xard, &suitImages[xard.rank], &mainFont,&gameImage);
+					dealerHiddenVisual->SetFaceDown(true);
 					ShowPopUp("PLAYER'S TURN", WHITE, 3);
 					state = GameState::playerTurn;
 				}
@@ -85,6 +96,7 @@ void Game::DrawCards(){
 	for (int i = 0; i < static_cast<int>(playerSplit.visual.size()); ++i) {
 		playerSplit.visual[i].Draw();
 	}
+	if (dealerHiddenVisual) dealerHiddenVisual->Draw();
 }
 
 void Game::DrawScore(){
@@ -124,17 +136,16 @@ void Game::DrawButtons(){
 
 void Game::DrawBackground() {
 	DrawTexture(gameImage.matTexture, 0, 0, WHITE);
-	if (state == GameState::playerTurn) DrawUpsideCard();
+	if (state != GameState::betting && state != GameState::roundEnd) DrawDeck();
 	DrawRectangle(screenWidth - 295, 0, 295, 950, lightGreen);
 	DrawRectangle(screenWidth - 300, 0, 5, 950, BLACK);
 	DrawRectangleLinesEx({ 0,0,screenWidth,screenHeight }, 5, BLACK);
 }
 
-void Game::DrawUpsideCard(){
-	if (state==GameState::playerTurn) {
-			DrawTexture(gameImage.hiddenCardTexture, 180, 27, WHITE);
-	}
+void Game::DrawDeck(){
+	DrawTexture(gameImage.hiddenCardTexture, 700, 300, WHITE);
 }
+
 
 void Game::DrawBetButtons(){
 	for (int i = 0; i < 4; i++) {
@@ -186,19 +197,17 @@ int Game::GetScoreOfCard(int cardValue)
 }
 
 
-void Game::UpdateButtons(Hand player,int y){
-	if (!dealQueue.empty()) return;
+void Game::UpdateButtons(Hand &player,int y){
+	if (!dealQueue.empty()||CardsAreMoving()) return;
 
 	if (state==GameState::playerTurn) {
 		if (hit.IsButtonPressed() && GetScore(player.cards) < 21) {
-			QueueHit(player.visual,player.cards,y);
+			QueueHit(player,y);
 		}
 		else if ((stand.IsButtonPressed()||GetScore(player.cards)>=21)&&player.cards.size()>=2) {
 			if (!splitHand || dealToSplitHand) {
 				state = GameState::dealerTurn;
-				Card card(210, dealer_Y, cpuHiddenCard, &suitImages[cpuHiddenCard.rank], &mainFont);
-				cpuCards.push_back(card);
-				cpuHand.push_back(cpuHiddenCard);
+				RevealHiddenCard();
 				timers.dealerTurnStart = GetTime();
 			}
 			else {
@@ -222,17 +231,16 @@ void Game::UpdateButtons(Hand player,int y){
 				ShowPopUp("YOU SURRENDERED, HALF YOUR BET HAS BEEN RETURNED", WHITE, 3);
 				state = GameState::dealerPause;
 				timers.resultPauseStart = GetTime();
-				Card card(210, dealer_Y, cpuHiddenCard, &suitImages[cpuHiddenCard.rank], &mainFont);
-				cpuCards.push_back(card);
-				cpuHand.push_back(cpuHiddenCard);
+				RevealHiddenCard();
 			}
 		}
 		else if (Double.IsButtonPressed()&&playerMain.bet<=money) {
 			money -= playerMain.bet;
 			playerMain.bet *= 2;
-			QueueHit(player.visual,player.cards,y);
+			QueueHit(player,y);
 			if (!splitHand || dealToSplitHand) {
 				state = GameState::dealerTurn;
+				RevealHiddenCard();
 				timers.dealerTurnStart = GetTime();
 			}
 			else {
@@ -269,7 +277,7 @@ void Game::cpuGet17(){
 	if (HasEnoughTimePassed(timers.dealerTurnStart, 0.8)) {
 		valRank card = deck.DrawCard();
 		cpuHand.push_back(card);
-		cpuCards.emplace_back(50 + cpuCards.size() * cardSpacing, dealer_Y, card,&suitImages[card.rank],&mainFont);
+		cpuCards.emplace_back(50 + cpuCards.size() * cardSpacing, dealer_Y, card,&suitImages[card.rank],&mainFont,&gameImage);
 	}
 }
 
@@ -372,6 +380,7 @@ void Game::ResetRound(){
 		splitHand = false;
 		dealToSplitHand = false;
 		surrendered = false;
+		dealerHiddenVisual = nullptr;
 		resultText = "";
 		cpuHand.clear();
 		cpuCards.clear();
@@ -391,7 +400,7 @@ void Game::StartRound(){
 
 void Game::SplitFunc(){
 	playerSplit.cards.push_back(playerMain.cards[1]);
-	playerSplit.visual.emplace_back(50, YOfSplitCards, playerSplit.cards[0], &suitImages[playerMain.visual[1].card.rank], &mainFont);
+	playerSplit.visual.emplace_back(50, YOfSplitCards, playerSplit.cards[0], &suitImages[playerMain.visual[1].card.rank], &mainFont,&gameImage);
 	playerMain.visual.pop_back();
 	playerMain.cards.pop_back();
 
@@ -401,8 +410,8 @@ void Game::SplitFunc(){
 	timers.cardDealStart = GetTime();
 }
 
-void Game::QueueHit(vector<Card>& cards, vector<valRank>& hand, int y){
-	dealQueue.push({ &cards,&hand,y });
+void Game::QueueHit(Hand& hand, int y){
+	dealQueue.push({ &hand.visual,&hand.cards,y });
 }
 
 void Game::ProcessDealQueue(double delay){
@@ -412,7 +421,7 @@ void Game::ProcessDealQueue(double delay){
 		auto& d = dealQueue.front();
 		valRank v = deck.DrawCard();
 
-		d.cards->emplace_back(50 + d.cards->size() * cardSpacing, d.y, v, &suitImages[v.rank], &mainFont);
+		d.cards->emplace_back(50 + d.cards->size() * cardSpacing, d.y, v, &suitImages[v.rank], &mainFont,&gameImage);
 		d.hand->emplace_back(v);
 
 		dealQueue.pop();
@@ -553,7 +562,7 @@ void Game::LoadLastGame(){
 				valRank card;
 				fin >> card.value >> card.rank;
 				playerMain.cards.push_back(card);
-				playerMain.visual.emplace_back(50 + i * cardSpacing, player_Y, card, &suitImages[card.rank], &mainFont);
+				playerMain.visual.emplace_back(50 + i * cardSpacing, player_Y, card, &suitImages[card.rank], &mainFont,&gameImage);
 			}
 			int cpuHandSize;
 			fin >> label >> cpuHandSize >> label;
@@ -563,7 +572,7 @@ void Game::LoadLastGame(){
 				valRank card;
 				fin >> card.value >> card.rank;
 				cpuHand.push_back(card);
-				cpuCards.emplace_back(50 + i * cardSpacing, dealer_Y, card, &suitImages[card.rank], &mainFont);
+				cpuCards.emplace_back(50 + i * cardSpacing, dealer_Y, card, &suitImages[card.rank], &mainFont,&gameImage);
 			}
 			fin >> label >> cpuHiddenCard.value >> cpuHiddenCard.rank;
 			fin >> label >> cardsDealtCount;
@@ -584,7 +593,7 @@ void Game::LoadLastGame(){
 					valRank card;
 					fin >> card.value >> card.rank;
 					playerSplit.cards.push_back(card);
-					playerSplit.visual.emplace_back(50 + i * cardSpacing, YOfSplitCards, card, &suitImages[card.rank], &mainFont);
+					playerSplit.visual.emplace_back(50 + i * cardSpacing, YOfSplitCards, card, &suitImages[card.rank], &mainFont,&gameImage);
 				}
 				fin >> label >> bet;
 				playerSplit.bet = bet;
@@ -609,6 +618,23 @@ void Game::UpdateHomeButton(){
 		state = GameState::MainMenu;
 	}
 	return;
+}
+
+void Game::UpdateCards(){
+	for (auto& c : playerMain.visual) c.Update();
+	for (auto& c : playerSplit.visual) c.Update();
+	for (auto& c : cpuCards)c.Update();
+	if (dealerHiddenVisual) dealerHiddenVisual->Update();
+}
+
+void Game::RevealHiddenCard(){
+	dealerHiddenVisual->SetFaceDown(false);
+	dealerHiddenVisual->target = { 210,dealer_Y };
+	dealerHiddenVisual->pos = { 210,dealer_Y };
+	cpuCards.push_back(*dealerHiddenVisual);
+	cpuHand.push_back(dealerHiddenVisual->card);
+	delete dealerHiddenVisual;
+	dealerHiddenVisual = nullptr;
 }
 
 Color Game::GetresultColor(ResultStates r)
@@ -695,6 +721,7 @@ void Game::Update() {
 	case GameState::dealing:
 		UpdateDealing(0.8);
 		UpdateHomeButton();
+		UpdateCards();
 		break;
 	case GameState::playerTurn:
 		if (!dealToSplitHand) {
@@ -705,12 +732,15 @@ void Game::Update() {
 		}
 		ProcessDealQueue(0.8);
 		UpdateHomeButton();
+		UpdateCards();
 		break;
 	case GameState::dealerTurn:
 		cpuGet17();
 		UpdateHomeButton();
+		UpdateCards();
 		break;
 	case GameState::dealerPause:
+		UpdateCards();
 		DealerPauseUpdate(3);
 		break;
 	case GameState::roundEnd:

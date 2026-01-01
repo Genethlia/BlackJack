@@ -1,16 +1,16 @@
-Money: 800
+Money: 950
 State: 3
-MainBet: 200
+MainBet: 50
 LastBetSize: 1
-Bet1: 200
+Bet1: 50
 PlayerHandSize: 2
 PlayerHand: 
-6 3
-7 2
+7 1
+4 2
 DealerHandSize: 1
 DealerHand: 
-5 1
-DealerHiddenCard: 7 3
+3 0
+DealerHiddenCard: 13 2
 CardsDealt: 3
 IsRoundOver: 0
 IsSplitEnabledThisRound? 0

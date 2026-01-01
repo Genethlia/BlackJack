@@ -73,16 +73,17 @@ private:
 	bool splitHand;//Is split pressed in this round
 	bool dealToSplitHand;//For dealing to split hand
 	bool surrendered;//Has the player surrendered this round
+	bool CardsAreMoving();
 
 	void UpdateDealing(double TimePassed); //Adds cards to player and dealer hands over time
 	void DrawCards();//Draws all cards in a vector
 	void DrawScore();//Draws the scores of player and dealer
 	void DrawButtons();//Draws the buttons
 	void DrawBackground();//Draws the table background
-	void DrawUpsideCard();
+	void DrawDeck();
 	void DrawBetButtons();//Draws the bet buttons
 	void DrawMoneyBets();//Draws the player's money and current bet
-	void UpdateButtons(Hand player,int y);//Updates button states
+	void UpdateButtons(Hand& player,int y);//Updates button states
 	void cpuGet17();//Dealer draws cards until reaching at least 17
 	void UpdateResults();//Calculates and displays the results of the round
 	void UpdateBettingButtons();//Updates bets based on button presses
@@ -90,7 +91,7 @@ private:
 	void ResetRound();//Resets the game state for a new round
 	void StartRound();//Starts new round
 	void SplitFunc();//Splits the player's hand into two hands
-	void QueueHit(vector<Card>& playerCards, vector<valRank>& playerHand, int y);
+	void QueueHit(Hand& hand, int y);
 	void ProcessDealQueue(double delay);//Processes the pending deal queue
 	void ShowPopUp(string text,Color color,double duration);//Shows messages like "Not enough money"
 	void DrawPopUpMessage();//Draws the popup message if active
@@ -98,6 +99,8 @@ private:
 	void LoadLastGame();//Loads the player's money from a file
 	void DrawHomeButton();//Draws the home button
 	void UpdateHomeButton();//Updates the home button(Should be called in every frame when not in mainMenu)
+	void UpdateCards();
+	void RevealHiddenCard();
 
 	Timers timers;
 
@@ -154,4 +157,6 @@ private:
 	MainMenu mainMenu;
 
 	HomeButton homeButton = HomeButton();
+
+	Card* dealerHiddenVisual;
 };
