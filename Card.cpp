@@ -1,7 +1,7 @@
 #include "Card.h"
 
-Card::Card(float x, float y, valRank card,Images* suitTextures,Font* font,Images* gameimages)
-  :suitTextures(suitTextures),font(font),gameimages(gameimages) {
+Card::Card(float x, float y, valRank card,Images* suitTextures,Font* font,Images* gameimages,vector<valRank>* cards)
+  :suitTextures(suitTextures),font(font),gameimages(gameimages),cards(cards) {
 	target = { x,y };
 	pos = { 800,300 };
 
@@ -71,6 +71,7 @@ void Card::Update(){
 		pos = target;
 		moving = false;
 		facedown = false;
+		cards->push_back(card);
 		return;
 	}
 	else {
@@ -89,6 +90,10 @@ bool Card::IsMoving(){
 
 void Card::SetFaceDown(bool v){
 	secret = v;
+}
+
+void Card::GoImmediatelyToTarget(){
+	pos = target;
 }
 
 string Card::cardnum(valRank card){

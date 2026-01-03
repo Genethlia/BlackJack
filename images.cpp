@@ -39,7 +39,7 @@ void Images::LoadMatHiddenCardAndHome() {
 		UnloadImage(mat);
 
 		mat = LoadImage("Images/card.png");
-		ImageResize(&mat, 180, 250);
+		ImageResize(&mat, 120, 200);
 		hiddenCardTexture = LoadTextureFromImage(mat);
 		UnloadImage(mat);
 

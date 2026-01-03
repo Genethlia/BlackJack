@@ -7,12 +7,13 @@ using namespace std;
 
 class Card {
 public:
-	Card(float x, float y, valRank card,Images* suitTextures, Font* font,Images* gameimages);
+	Card(float x, float y, valRank card,Images* suitTextures, Font* font,Images* gameimages,vector<valRank>* cards);
 	~Card() = default;
 	void Draw();
 	void Update();
 	bool IsMoving();
 	void SetFaceDown(bool v);
+	void GoImmediatelyToTarget();
 	Vector2 pos;
 	valRank card;
 	Vector2 target;
@@ -30,4 +31,5 @@ private:
 	Images* suitTextures;
 	Images* gameimages;
 	Font* font;
+	vector<valRank>* cards;
 };

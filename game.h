@@ -30,6 +30,7 @@ enum class GameState{
 struct PendingDeal {
 	vector<Card>* cards;
 	vector<valRank>* hand;
+	vector<valRank>* results;
 	int y;
 };
 
@@ -53,9 +54,10 @@ struct Timers {
 
 struct Hand {
 	vector<valRank> cards;
+	vector<valRank> results;
 	vector<Card> visual;
 	int bet = 0;
-	bool finished = false;
+	void ClearAll();
 };
 
 class Game {
@@ -112,8 +114,7 @@ private:
 
 	Hand playerMain;
 	Hand playerSplit;
-	vector<valRank> cpuHand;
-	vector<Card> cpuCards;
+	Hand cpu;
 
 	Button hit=Button(60,"HIT");
 	Button stand = Button(210, "STAND");
@@ -132,8 +133,6 @@ private:
 
 	Font mainFont;            // shared font
 
-	valRank cpuHiddenCard;
-
 	GameState state = GameState::MainMenu;
 
 	Color resultColor;
@@ -148,7 +147,7 @@ private:
 
 	queue<PendingDeal> dealQueue;
 
-	ResultStates ResolveHand(Hand hand);//Resolves a single hand against the dealer's hand
+	ResultStates ResolveHand(const Hand& hand);//Resolves a single hand against the dealer's hand
 	ResultStates mainResult = ResultStates::None;
 	ResultStates splitResult = ResultStates::None;
 
