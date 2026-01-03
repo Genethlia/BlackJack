@@ -14,13 +14,17 @@ public:
 	bool IsMoving();
 	void SetFaceDown(bool v);
 	void GoImmediatelyToTarget();
+	void StartFlip();
 	Vector2 pos;
 	valRank card;
 	Vector2 target;
+	bool secret;
 private:
 	bool moving;
 	bool facedown;
-	bool secret;
+	bool firstsecret;
+	bool flipping;
+	float flipProgress;
 	float width, height;
 	string cardnum(valRank card);//Returns the string representation of the card value
 	int GetColorOfRank(valRank card);//Returns pointer to color array based on card suit

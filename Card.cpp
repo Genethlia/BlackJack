@@ -12,6 +12,9 @@ Card::Card(float x, float y, valRank card,Images* suitTextures,Font* font,Images
 	moving = true;
 	facedown = true;
 	secret = false;
+	firstsecret = true;
+	flipping = false;
+	flipProgress = 0.0f;
 
 	color[0] = { 0,0,0,255 };
 	color[1] = { 255,0,0,255 };
@@ -38,41 +41,64 @@ Card::Card(float x, float y, valRank card,Images* suitTextures,Font* font,Images
 
 
 void Card::Draw(){
-	if ((secret||facedown)&&gameimages->hiddenCardTexture.id!=0) {
-		DrawTexture(gameimages->hiddenCardTexture, pos.x, pos.y, WHITE);
+	float scaleX = cos(flipProgress * PI);
+	bool showBack = (flipProgress < 0.5f);
+
+
+	float displayScaleX = abs(scaleX);
+
+	Rectangle source = { 0, 0, (float)gameimages->hiddenCardTexture.width, (float)gameimages->hiddenCardTexture.height };
+	Rectangle destRec = { pos.x + width * (1 - displayScaleX) / 2, pos.y, width * displayScaleX, (float)height };
+	Vector2 origin = { 0, 0 };
+
+	bool shouldShowBack = (secret || (facedown && showBack));
+
+	if (shouldShowBack) {
+		DrawTexturePro(gameimages->hiddenCardTexture, source, destRec, origin, 0, WHITE);
 		return;
 	}
 
+	if (!flipping) {
+		destRec = { pos.x, pos.y, width, height };
+		displayScaleX = 1.0f;
+	}
+
 	int PointerOfcolor = GetColorOfRank(card);
-	DrawRectangle(pos.x, pos.y, width, height,WHITE);
-	DrawTextEx(*font, cardnum(card).c_str(), { pos.x + 5, pos.y + 5 }, 30, 2, color[PointerOfcolor]);
-	DrawTextPro(*font, cardnum(card).c_str(), { pos.x+width-5, pos.y+height-5 }, { 0,0 }, 180, 30, 2,color[PointerOfcolor]);
-	// ranksObj textures are valid only if created for suit ranks
+
+	DrawRectanglePro(destRec, origin, 0, WHITE);
+
+	float suitOffset = (1.0f - displayScaleX) * width / 3 + 5;
+
+	DrawTextEx(*font, cardnum(card).c_str(), { pos.x + 5 + suitOffset, pos.y + 5 }, 30, 2, color[PointerOfcolor]);
+	DrawTextPro(*font, cardnum(card).c_str(), { pos.x + width - 5 - suitOffset, pos.y + height - 5 }, { 0, 0 }, 180, 30, 2, color[PointerOfcolor]);
+
 	if (suitTextures->filiTexture.id != 0) {
-		DrawTexture(suitTextures->filiTexture, pos.x+smalloffset, pos.y + 30, WHITE);
-		DrawTextureEx(suitTextures->filiTexture, { width + pos.x-smalloffset, height + pos.y-30 },180,1, WHITE);
+		DrawTexture(suitTextures->filiTexture,pos.x + smalloffset + suitOffset, pos.y + 30, WHITE);
+		DrawTextureEx(suitTextures->filiTexture,{ width + pos.x - smalloffset - suitOffset, height + pos.y - 30 },180, 1, WHITE);
 	}
 	if (suitTextures->bigfiliTexture.id != 0) {
-		DrawTexture(suitTextures->bigfiliTexture, pos.x+width/2-bigoffset, pos.y+height/2-40, WHITE);
+		DrawTexture(suitTextures->bigfiliTexture,pos.x + width / 2 - bigoffset, pos.y + height / 2 - 40, WHITE);
 	}
 	
 }
 
 void Card::Update(){
-	if (!moving) return;
+	if (!moving&&!firstsecret&&!flipping) return;
 
 	Vector2 dir = { target.x - pos.x,target.y - pos.y };
 
 	float dist = sqrt(dir.x * dir.x + dir.y * dir.y);
 
 	float speed = dist * 12 * GetFrameTime();
-
+	if (!moving && !secret&&firstsecret) {
+		cards->push_back(card);
+		firstsecret = false;
+		StartFlip();
+		return;
+	}
 	if (dist <= 0.5f) {
 		pos = target;
 		moving = false;
-		facedown = false;
-		cards->push_back(card);
-		return;
 	}
 	else {
 		dir.x /= dist;
@@ -81,11 +107,18 @@ void Card::Update(){
 		pos.x += dir.x * speed;
 		pos.y += dir.y * speed;
 	}
-
+	if (flipping) {
+		flipProgress += GetFrameTime() * 3;
+		if (flipProgress >= 1.0f) {
+			flipProgress = 1.0f;
+			flipping = false;
+			facedown = false;
+		}
+	}
 }
 
 bool Card::IsMoving(){
-	return moving;
+	return moving||flipping;
 }
 
 void Card::SetFaceDown(bool v){
@@ -94,6 +127,12 @@ void Card::SetFaceDown(bool v){
 
 void Card::GoImmediatelyToTarget(){
 	pos = target;
+	moving = false;
+}
+
+void Card::StartFlip(){
+	flipping = true;
+	flipProgress = 0.0f;
 }
 
 string Card::cardnum(valRank card){

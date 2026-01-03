@@ -43,41 +43,43 @@ bool Game::CardsAreMoving(){
 }
 
 void Game::UpdateDealing(double TimePassed){
-		if (HasEnoughTimePassed(timers.animationStart, TimePassed)) {
-			valRank xard = deck.DrawCard();
-			//valRank xard = { 1,1 };//testing split
-			switch(cardsDealtCount){
-			case 0:
-				playerMain.visual.emplace_back(50, player_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &playerMain.results);
-				playerMain.cards.push_back(xard);
-				break;
-			case 1:
-				cpu.visual.emplace_back(50, dealer_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &cpu.results);
-				cpu.cards.push_back(xard);
-				break;
-			case 2:
-				playerMain.visual.emplace_back(210, player_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &playerMain.results);
-				playerMain.cards.push_back(xard);
-				break;
-			case 3:
-				cpu.visual.emplace_back(210, dealer_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &cpu.results);
-				cpu.visual.back().SetFaceDown(true);
-				cpu.cards.push_back(xard);
-				if (GetScore(cpu.cards) == 21) {
-					timers.resultPauseStart = GetTime();
-					ShowPopUp("DEALER HIT A BLACKJACK", RED, 3);
-					state = GameState::dealerPause;
-				}
-				else {
-					ShowPopUp("PLAYER'S TURN", WHITE, 3);
-					state = GameState::playerTurn;
-				}
-				return;
-			default:
-				break;
+	if (CardsAreMoving()) return;
+
+	if (HasEnoughTimePassed(timers.animationStart, TimePassed)) {
+		valRank xard = deck.DrawCard();
+		//valRank xard = { 1,1 };//testing split
+		switch (cardsDealtCount) {
+		case 0:
+			playerMain.visual.emplace_back(50, player_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &playerMain.results);
+			playerMain.cards.push_back(xard);
+			break;
+		case 1:
+			cpu.visual.emplace_back(50, dealer_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &cpu.results);
+			cpu.cards.push_back(xard);
+			break;
+		case 2:
+			playerMain.visual.emplace_back(210, player_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &playerMain.results);
+			playerMain.cards.push_back(xard);
+			break;
+		case 3:
+			cpu.visual.emplace_back(210, dealer_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &cpu.results);
+			cpu.visual.back().SetFaceDown(true);
+			cpu.cards.push_back(xard);
+			if (GetScore(cpu.cards) == 21) {
+				timers.resultPauseStart = GetTime();
+				ShowPopUp("DEALER HIT A BLACKJACK", RED, 3);
+				state = GameState::dealerPause;
 			}
-			cardsDealtCount++;
+			else {
+				ShowPopUp("PLAYER'S TURN", WHITE, 3);
+				state = GameState::playerTurn;
+			}
+			return;
+		default:
+			break;
 		}
+		cardsDealtCount++;
+	}
 }
 
 void Game::DrawCards(){
