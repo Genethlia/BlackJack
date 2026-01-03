@@ -156,6 +156,4 @@ private:
 	MainMenu mainMenu;
 
 	HomeButton homeButton = HomeButton();
-
-	Card* dealerHiddenVisual;
 };
