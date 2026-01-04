@@ -172,6 +172,15 @@ HomeButton::HomeButton():Button(5,"") {
 	color[1] = WHITE;
 }
 
+void HomeButton::FindX(int state){
+	if (state == -1) return;
+	if (state == 2||state==3) {
+		x = 1050;
+		return;
+	}
+	x = 845;
+}
+
 OvalButton::OvalButton(int y, bool* state):Button(y,"") {
 	x = 950;
 	this->y = y;

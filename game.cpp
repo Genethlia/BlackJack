@@ -24,6 +24,7 @@ void Game::Draw() {
 	}
 	else if (state == GameState::settings) {
 		DrawHomeButton();
+		ovalbutton.Draw();
 	}
 	else {
 		DrawBackground();
@@ -465,55 +466,57 @@ void Game::DealerPauseUpdate(double duration){
 }
 
 void Game::SaveGame(){
-	fs::path filename("saves/save.txt");
-	fs::path folder=filename.parent_path();
-	if (!folder.empty() && !fs::exists(folder)) {
-		fs::create_directories(folder);
-	}
-	deck.SaveDeck();
-	ofstream fout("saves/save.txt");
-	if (fout.is_open()) {
-		fout << "Money: " << money << endl;
+	if (state != GameState::settings&&state!=GameState::stats) {
+		fs::path filename("saves/save.txt");
+		fs::path folder = filename.parent_path();
+		if (!folder.empty() && !fs::exists(folder)) {
+			fs::create_directories(folder);
+		}
+		deck.SaveDeck();
+		ofstream fout("saves/save.txt");
+		if (fout.is_open()) {
+			fout << "Money: " << money << endl;
 
-		fout << "State: ";
-		if (state != GameState::MainMenu && state != GameState::roundEnd) {
-			fout << int(state);
+			fout << "State: ";
+			if (state != GameState::MainMenu && state != GameState::roundEnd) {
+				fout << int(state);
+			}
+			else {
+				fout << int(GameState::betting);
+			}
+			fout << endl;
+			fout << "MainBet: " << playerMain.bet << endl;
+
+			vector<int> tempBets;
+			stack<int> copyStack = lastBet;
+			while (!copyStack.empty()) {
+				tempBets.push_back(copyStack.top());
+				copyStack.pop();
+			}
+			fout << "LastBetSize: " << tempBets.size() << endl;
+			for (int i = tempBets.size() - 1; i >= 0; i--) {
+				fout << "Bet" << i + 1 << ": " << tempBets[i] << endl;
+			}
+
+			fout << "PlayerHandSize: " << playerMain.cards.size() << endl << "PlayerHand: ";
+			for (auto& card : playerMain.cards) fout << endl << card.value << " " << card.rank;
+			fout << endl;
+			fout << "DealerHandSize: " << cpu.cards.size() << endl << "DealerHand: ";
+			for (auto& card : cpu.visual) fout << endl << card.card.value << " " << card.card.rank << " " << card.secret;
+			fout << endl;
+			fout << endl << "CardsDealt: " << cardsDealtCount << endl;
+			fout << "IsRoundOver: " << roundOver << endl;
+			fout << "IsSplitEnabledThisRound? " << splitHand << endl;
+			fout << "SplitHandSize: " << playerSplit.cards.size() << endl << "SplitHand: ";
+			for (auto& card : playerSplit.cards) fout << endl << card.value << " " << card.rank;
+			fout << endl;
+			fout << "SplitBet: " << playerSplit.bet << endl;
+			fout << "ShouldYouDealToSplitHand: " << dealToSplitHand << endl;
+			fout.close();
 		}
 		else {
-			fout << int(GameState::betting);
+			ShowPopUp("Failed To Save Game", RED, 3);
 		}
-		fout << endl;
-		fout << "MainBet: " << playerMain.bet << endl;
-
-		vector<int> tempBets;
-		stack<int> copyStack = lastBet;
-		while (!copyStack.empty()) {
-			tempBets.push_back(copyStack.top());
-			copyStack.pop();
-		}
-		fout << "LastBetSize: " << tempBets.size() << endl;
-		for (int i = tempBets.size() - 1; i >= 0; i--) {
-			fout << "Bet" << i + 1 << ": " << tempBets[i] << endl;
-		}
-
-		fout << "PlayerHandSize: " << playerMain.cards.size() << endl << "PlayerHand: ";
-		for (auto& card : playerMain.cards) fout << endl << card.value << " " << card.rank;
-		fout << endl;
-		fout << "DealerHandSize: " << cpu.cards.size() << endl << "DealerHand: ";
-		for (auto& card : cpu.visual) fout <<endl<< card.card.value << " " << card.card.rank<<" " << card.secret;
-		fout << endl ;
-		fout << endl << "CardsDealt: " << cardsDealtCount << endl;
-		fout << "IsRoundOver: " << roundOver << endl;
-		fout << "IsSplitEnabledThisRound? " << splitHand << endl;
-		fout << "SplitHandSize: " << playerSplit.cards.size() << endl << "SplitHand: ";
-		for (auto& card : playerSplit.cards) fout << endl << card.value << " " << card.rank;
-		fout << endl;
-		fout << "SplitBet: " << playerSplit.bet << endl;
-		fout << "ShouldYouDealToSplitHand: " << dealToSplitHand << endl;
-		fout.close();
-	}
-	else {
-		ShowPopUp("Failed To Save Game", RED, 3);
 	}
 }
 
@@ -606,7 +609,7 @@ void Game::LoadLastGame(){
 
 void Game::DrawHomeButton(){
 	homeButton.Draw();
-	DrawTexture(gameImage.mainMenuhomeTexture, 895 - gameImage.mainMenuhomeTexture.width, 5, WHITE);
+	DrawTexture(gameImage.mainMenuhomeTexture, homeButton.x , 5, WHITE);
 }
 
 void Game::UpdateHomeButton(){
@@ -690,6 +693,7 @@ void Game::Update() {
 	switch (state) {
 	case GameState::MainMenu:
 		mainMenu.Update();
+		homeButton.FindX(mainMenu.placeholder);
 		if (mainMenu.placeholder == -1) {
 			break;
 		}
@@ -710,6 +714,7 @@ void Game::Update() {
 		break;
 	case GameState::settings:
 		UpdateHomeButton();
+		ovalbutton.Update();
 		break;
 	case GameState::betting:
 		UpdateBettingButtons();

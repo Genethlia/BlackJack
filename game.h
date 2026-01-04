@@ -20,6 +20,7 @@ enum class ResultStates {
 enum class GameState{
 	MainMenu,
 	settings,
+	stats,
 	betting,
 	dealing,
 	playerTurn,
@@ -157,4 +158,6 @@ private:
 	MainMenu mainMenu;
 
 	HomeButton homeButton = HomeButton();
+
+	OvalButton ovalbutton = OvalButton(180, &surrendered);
 };

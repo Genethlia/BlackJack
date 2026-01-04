@@ -1,5 +1,5 @@
-Money: 1000
-State: 1
+Money: 600
+State: 2
 MainBet: 0
 LastBetSize: 0
 PlayerHandSize: 0

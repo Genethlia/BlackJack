@@ -4,14 +4,14 @@ using namespace std;
 
 class Button {
 protected:
-    int x, width, offsetX, height;
+    int width, offsetX, height;
     Color color[2] = {darkGreen,tableGreen};
     string type; // string to hold the text letters
 private:
     string Text; // temporary string to hold the button text
     int findOffsetX(string type); // function to find the offset for text positioning
 public:
-    int y;
+    int x,y;
     Button(int y, string Text);
     virtual void Draw(); // draw the button
     bool IsButtonPressed(); // check if button is pressed
@@ -54,6 +54,7 @@ private:
 class HomeButton :public Button {
 public:
     HomeButton();
+    void FindX(int state);
 };
 
 class OvalButton :public Button {
