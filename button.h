@@ -55,3 +55,17 @@ class HomeButton :public Button {
 public:
     HomeButton();
 };
+
+class OvalButton :public Button {
+public:
+    OvalButton(int y, bool* state);
+    void Draw() override;
+    void Update();
+    bool collision() override;
+private:
+    bool* state;
+    int ovalWidth;
+    int ovalHeight;
+    int knobRadius;
+    float slideOffset;
+};

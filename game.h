@@ -19,6 +19,7 @@ enum class ResultStates {
 
 enum class GameState{
 	MainMenu,
+	settings,
 	betting,
 	dealing,
 	playerTurn,

@@ -140,7 +140,7 @@ MainMenuButton::MainMenuButton(int y, string Text):Button(y,Text){
 	x = 20;
 	offsetX = 5;
 	width = MeasureText(Text.c_str(), 50) + 40;
-	color[0] = BLACK;
+	color[0] = lightGreen;
 	color[1] = darkGreen;
 	placeholder = y / 100 - 3;
 }
@@ -170,4 +170,46 @@ HomeButton::HomeButton():Button(5,"") {
 	offsetX = 5;
 	color[0] = transparent;
 	color[1] = WHITE;
+}
+
+OvalButton::OvalButton(int y, bool* state):Button(y,"") {
+	x = 950;
+	this->y = y;
+	ovalWidth = 150;
+	ovalHeight = 60;
+	knobRadius = ovalHeight / 2 - 5;
+	this->state = state;
+	slideOffset = 0.0f;
+	color[1] = darkGreen;
+	color[0] = red;
+}
+
+void OvalButton::Draw(){
+	bool isOn = state ? *state : false;
+
+	Color temp = color[isOn];
+	DrawRectangleRounded({ (float)x,(float)y,(float)ovalWidth,(float)ovalHeight }, 1.0f, 16, temp);
+
+	float targetoffset = isOn ? ovalWidth - ovalHeight : 0;
+	slideOffset = Lerp(slideOffset, targetoffset, 0.2f);
+
+	float knobX=x+ovalHeight/2+slideOffset;
+	float knobY=y+ovalHeight/2;
+	bool tempb = collision();
+	DrawCircle(knobX, knobY, knobRadius - 3, tempb ? LIGHTGRAY : GRAY);
+}
+
+void OvalButton::Update(){
+	if (IsButtonPressed()) {
+		if (state) {
+			*state = !*state;
+		}
+	}
+}
+
+bool OvalButton::collision(){
+	Vector2 mouseposition = GetMousePosition();
+	Rectangle rec = { (float)x,(float)y,(float)width,(float)height };
+
+	return CheckCollisionPointRec(mouseposition, rec);
 }

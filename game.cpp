@@ -22,6 +22,9 @@ void Game::Draw() {
 	if (state == GameState::MainMenu) {
 		mainMenu.Draw();
 	}
+	else if (state == GameState::settings) {
+		DrawHomeButton();
+	}
 	else {
 		DrawBackground();
 		DrawHomeButton();
@@ -68,6 +71,7 @@ void Game::UpdateDealing(double TimePassed){
 			if (GetScore(cpu.cards) == 21) {
 				timers.resultPauseStart = GetTime();
 				ShowPopUp("DEALER HIT A BLACKJACK", RED, 3);
+				cpu.visual.back().SetFaceDown(false);
 				state = GameState::dealerPause;
 			}
 			else {
@@ -691,16 +695,21 @@ void Game::Update() {
 		}
 		else if (mainMenu.placeholder == 0) {
 			StartRound();
-			state = GameState::betting;
 		}
 		else if (mainMenu.placeholder == 1) {
 			StartRound();
 			LoadLastGame();
 			timers.SetAllTimersToNow();
 		}
+		else if (mainMenu.placeholder == 2) {
+			state = GameState::settings;
+		}
 		else if (mainMenu.placeholder == 4) {
 			ShouldWindowClose = true;
 		}
+		break;
+	case GameState::settings:
+		UpdateHomeButton();
 		break;
 	case GameState::betting:
 		UpdateBettingButtons();
