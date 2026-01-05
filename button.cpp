@@ -175,22 +175,23 @@ HomeButton::HomeButton():Button(5,"") {
 void HomeButton::FindX(int state){
 	if (state == -1) return;
 	if (state == 2||state==3) {
-		x = 1050;
+		x = 1150;
 		return;
 	}
 	x = 845;
 }
 
-OvalButton::OvalButton(int y, bool* state):Button(y,"") {
+OvalButton::OvalButton(int y, bool* state,string Text):Button(y,"") {
 	x = 950;
 	this->y = y;
-	ovalWidth = 150;
-	ovalHeight = 60;
+	ovalWidth = 100;
+	ovalHeight = 50;
 	knobRadius = ovalHeight / 2 - 5;
 	this->state = state;
 	slideOffset = 0.0f;
 	color[1] = darkGreen;
 	color[0] = red;
+	this->type = Text;
 }
 
 void OvalButton::Draw(){
@@ -206,6 +207,8 @@ void OvalButton::Draw(){
 	float knobY=y+ovalHeight/2;
 	bool tempb = collision();
 	DrawCircle(knobX, knobY, knobRadius - 3, tempb ? LIGHTGRAY : GRAY);
+
+	DrawText(type.c_str(), 10, y, 70, WHITE);
 }
 
 void OvalButton::Update(){

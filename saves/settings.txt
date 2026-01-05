@@ -1,0 +1,3 @@
+DealerHitOn17 1
+Music? 1
+SoundEffects? 1

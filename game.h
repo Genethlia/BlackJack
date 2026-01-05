@@ -2,6 +2,7 @@
 #include "Source.h"
 #include "Card.h"
 #include "mainMenu.h"
+#include "settings.h"
 constexpr int player_Y = 650;
 constexpr int dealer_Y = 50;
 constexpr int cardSpacing = 160;
@@ -159,5 +160,5 @@ private:
 
 	HomeButton homeButton = HomeButton();
 
-	OvalButton ovalbutton = OvalButton(180, &surrendered);
+	Settings settings = Settings();
 };

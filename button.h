@@ -59,7 +59,7 @@ public:
 
 class OvalButton :public Button {
 public:
-    OvalButton(int y, bool* state);
+    OvalButton(int y, bool* state,string Text);
     void Draw() override;
     void Update();
     bool collision() override;

@@ -24,7 +24,7 @@ void Game::Draw() {
 	}
 	else if (state == GameState::settings) {
 		DrawHomeButton();
-		ovalbutton.Draw();
+		settings.Draw();
 	}
 	else {
 		DrawBackground();
@@ -258,12 +258,14 @@ void Game::UpdateButtons(Hand &player,int y){
 void Game::cpuGet17(){
 	if (CardsAreMoving()) return;
 
+	int Stop = settings.ShouldDealerHitOn17 ? 18 : 17;
+
 	bool ShouldTheDealerStand;
 	if (!splitHand) {
-		ShouldTheDealerStand = GetScore(cpu.cards) >= 17 || GetScore(playerMain.cards) > 21 || (GetScore(playerMain.cards) == 21 && playerMain.cards.size() == 2);
+		ShouldTheDealerStand = GetScore(cpu.cards) >= Stop || GetScore(playerMain.cards) > 21 || (GetScore(playerMain.cards) == 21 && playerMain.cards.size() == 2);
 	}
 	else {
-		ShouldTheDealerStand = GetScore(cpu.cards) >= 17 || ((GetScore(playerMain.cards) > 21 || GetScore(playerMain.cards) == 21 && playerMain.cards.size() == 2) && (GetScore(playerSplit.cards) > 21 || GetScore(playerSplit.cards) == 21 && playerSplit.cards.size() == 2));
+		ShouldTheDealerStand = GetScore(cpu.cards) >= Stop || ((GetScore(playerMain.cards) > 21 || GetScore(playerMain.cards) == 21 && playerMain.cards.size() == 2) && (GetScore(playerSplit.cards) > 21 || GetScore(playerSplit.cards) == 21 && playerSplit.cards.size() == 2));
 		}
 	if (ShouldTheDealerStand) {
 		if (GetScore(cpu.cards) <= 21) {
@@ -465,58 +467,59 @@ void Game::DealerPauseUpdate(double duration){
 	return;
 }
 
-void Game::SaveGame(){
-	if (state != GameState::settings&&state!=GameState::stats) {
-		fs::path filename("saves/save.txt");
-		fs::path folder = filename.parent_path();
-		if (!folder.empty() && !fs::exists(folder)) {
-			fs::create_directories(folder);
-		}
-		deck.SaveDeck();
-		ofstream fout("saves/save.txt");
-		if (fout.is_open()) {
-			fout << "Money: " << money << endl;
+void Game::SaveGame() {
+	fs::path filename("saves/save.txt");
+	fs::path folder = filename.parent_path();
+	if (!folder.empty() && !fs::exists(folder)) {
+		fs::create_directories(folder);
+	}
+	settings.SaveSettings();
+	if (state == GameState::settings || state == GameState::stats) return;
 
-			fout << "State: ";
-			if (state != GameState::MainMenu && state != GameState::roundEnd) {
-				fout << int(state);
-			}
-			else {
-				fout << int(GameState::betting);
-			}
-			fout << endl;
-			fout << "MainBet: " << playerMain.bet << endl;
+	deck.SaveDeck();
+	ofstream fout("saves/save.txt");
+	if (fout.is_open()) {
+		fout << "Money: " << money << endl;
 
-			vector<int> tempBets;
-			stack<int> copyStack = lastBet;
-			while (!copyStack.empty()) {
-				tempBets.push_back(copyStack.top());
-				copyStack.pop();
-			}
-			fout << "LastBetSize: " << tempBets.size() << endl;
-			for (int i = tempBets.size() - 1; i >= 0; i--) {
-				fout << "Bet" << i + 1 << ": " << tempBets[i] << endl;
-			}
-
-			fout << "PlayerHandSize: " << playerMain.cards.size() << endl << "PlayerHand: ";
-			for (auto& card : playerMain.cards) fout << endl << card.value << " " << card.rank;
-			fout << endl;
-			fout << "DealerHandSize: " << cpu.cards.size() << endl << "DealerHand: ";
-			for (auto& card : cpu.visual) fout << endl << card.card.value << " " << card.card.rank << " " << card.secret;
-			fout << endl;
-			fout << endl << "CardsDealt: " << cardsDealtCount << endl;
-			fout << "IsRoundOver: " << roundOver << endl;
-			fout << "IsSplitEnabledThisRound? " << splitHand << endl;
-			fout << "SplitHandSize: " << playerSplit.cards.size() << endl << "SplitHand: ";
-			for (auto& card : playerSplit.cards) fout << endl << card.value << " " << card.rank;
-			fout << endl;
-			fout << "SplitBet: " << playerSplit.bet << endl;
-			fout << "ShouldYouDealToSplitHand: " << dealToSplitHand << endl;
-			fout.close();
+		fout << "State: ";
+		if (state != GameState::MainMenu && state != GameState::roundEnd) {
+			fout << int(state);
 		}
 		else {
-			ShowPopUp("Failed To Save Game", RED, 3);
+			fout << int(GameState::betting);
 		}
+		fout << endl;
+		fout << "MainBet: " << playerMain.bet << endl;
+
+		vector<int> tempBets;
+		stack<int> copyStack = lastBet;
+		while (!copyStack.empty()) {
+			tempBets.push_back(copyStack.top());
+			copyStack.pop();
+		}
+		fout << "LastBetSize: " << tempBets.size() << endl;
+		for (int i = tempBets.size() - 1; i >= 0; i--) {
+			fout << "Bet" << i + 1 << ": " << tempBets[i] << endl;
+		}
+
+		fout << "PlayerHandSize: " << playerMain.cards.size() << endl << "PlayerHand: ";
+		for (auto& card : playerMain.cards) fout << endl << card.value << " " << card.rank;
+		fout << endl;
+		fout << "DealerHandSize: " << cpu.cards.size() << endl << "DealerHand: ";
+		for (auto& card : cpu.visual) fout << endl << card.card.value << " " << card.card.rank << " " << card.secret;
+		fout << endl;
+		fout << endl << "CardsDealt: " << cardsDealtCount << endl;
+		fout << "IsRoundOver: " << roundOver << endl;
+		fout << "IsSplitEnabledThisRound? " << splitHand << endl;
+		fout << "SplitHandSize: " << playerSplit.cards.size() << endl << "SplitHand: ";
+		for (auto& card : playerSplit.cards) fout << endl << card.value << " " << card.rank;
+		fout << endl;
+		fout << "SplitBet: " << playerSplit.bet << endl;
+		fout << "ShouldYouDealToSplitHand: " << dealToSplitHand << endl;
+		fout.close();
+	}
+	else {
+		ShowPopUp("Failed To Save Game", RED, 3);
 	}
 }
 
@@ -714,7 +717,7 @@ void Game::Update() {
 		break;
 	case GameState::settings:
 		UpdateHomeButton();
-		ovalbutton.Update();
+		settings.Update();
 		break;
 	case GameState::betting:
 		UpdateBettingButtons();
@@ -773,5 +776,4 @@ void Hand::ClearAll(){
 	visual.clear();
 	results.clear();
 	cards.clear();
-	bet = 0;
 }
