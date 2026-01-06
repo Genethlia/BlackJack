@@ -7,7 +7,7 @@ using namespace std;
 
 class Card {
 public:
-	Card(float x, float y, valRank card,Images* suitTextures, Font* font,Images* gameimages,vector<valRank>* cards);
+	Card(float x, float y, valRank card,Images* suitTextures, Font* font,Images* gameimages,vector<valRank>* cards,Audio* audio,bool* soundenabled);
 	~Card() = default;
 	void Draw();
 	void Update();
@@ -36,4 +36,6 @@ private:
 	Images* gameimages;
 	Font* font;
 	vector<valRank>* cards;
+	Audio* gameaudio;
+	bool* soundenabled;
 };

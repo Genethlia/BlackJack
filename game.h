@@ -67,6 +67,7 @@ class Game {
 public:
 
 	Game();
+	~Game();
 
 	void Draw();//All the drawing functions
 	void Update();//All the update functions
@@ -106,6 +107,7 @@ private:
 	void UpdateHomeButton();//Updates the home button(Should be called in every frame when not in mainMenu)
 	void UpdateCards();
 	void RevealHiddenCard();
+	void PlaySoundEffect(Sound sound);
 
 	Timers timers;
 
@@ -161,4 +163,6 @@ private:
 	HomeButton homeButton = HomeButton();
 
 	Settings settings = Settings();
+
+	Audio gameAudio=Audio();
 };

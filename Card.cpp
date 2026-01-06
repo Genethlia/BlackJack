@@ -1,7 +1,7 @@
 #include "Card.h"
 
-Card::Card(float x, float y, valRank card,Images* suitTextures,Font* font,Images* gameimages,vector<valRank>* cards)
-  :suitTextures(suitTextures),font(font),gameimages(gameimages),cards(cards) {
+Card::Card(float x, float y, valRank card,Images* suitTextures,Font* font,Images* gameimages,vector<valRank>* cards,Audio* audio,bool* soundenabled)
+  :suitTextures(suitTextures),font(font),gameimages(gameimages),cards(cards),gameaudio(audio),soundenabled(soundenabled) {
 	target = { x,y };
 	pos = { 800,300 };
 
@@ -133,6 +133,10 @@ void Card::GoImmediatelyToTarget(){
 void Card::StartFlip(){
 	flipping = true;
 	flipProgress = 0.0f;
+
+	if (gameaudio && soundenabled && *soundenabled) {
+		PlaySound(gameaudio->cardFlip);
+	}
 }
 
 string Card::cardnum(valRank card){

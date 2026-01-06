@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Audio.h" />
     <ClInclude Include="button.h" />
     <ClInclude Include="Card.h" />
     <ClInclude Include="color.h" />
@@ -151,6 +152,7 @@
     <ClInclude Include="Source.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Audio.cpp" />
     <ClCompile Include="button.cpp" />
     <ClCompile Include="Card.cpp" />
     <ClCompile Include="deck.cpp" />

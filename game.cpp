@@ -1,6 +1,10 @@
 #include "game.h"
 
 Game::Game(){
+	InitAudioDevice();
+	gameAudio.LoadAll();
+
+
 	deck = Deck();
 	cardsDealtCount = 0;
 	money = 1000;
@@ -16,6 +20,10 @@ Game::Game(){
 	roundOver = false;
 
 	resultText = "";
+}
+
+Game::~Game(){
+	CloseAudioDevice();
 }
 
 void Game::Draw() {
@@ -54,25 +62,26 @@ void Game::UpdateDealing(double TimePassed){
 		//valRank xard = { 1,1 };//testing split
 		switch (cardsDealtCount) {
 		case 0:
-			playerMain.visual.emplace_back(50, player_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &playerMain.results);
+			playerMain.visual.emplace_back(50, player_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &playerMain.results, &gameAudio, &settings.IsSoundEffectsOn);
 			playerMain.cards.push_back(xard);
 			break;
 		case 1:
-			cpu.visual.emplace_back(50, dealer_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &cpu.results);
+			cpu.visual.emplace_back(50, dealer_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &cpu.results, &gameAudio, &settings.IsSoundEffectsOn);
 			cpu.cards.push_back(xard);
 			break;
 		case 2:
-			playerMain.visual.emplace_back(210, player_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &playerMain.results);
+			playerMain.visual.emplace_back(210, player_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &playerMain.results, &gameAudio, &settings.IsSoundEffectsOn);
 			playerMain.cards.push_back(xard);
 			break;
 		case 3:
-			cpu.visual.emplace_back(210, dealer_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &cpu.results);
+			cpu.visual.emplace_back(210, dealer_Y, xard, &suitImages[xard.rank], &mainFont, &gameImage, &cpu.results, &gameAudio, &settings.IsSoundEffectsOn);
 			cpu.visual.back().SetFaceDown(true);
 			cpu.cards.push_back(xard);
 			if (GetScore(cpu.cards) == 21) {
 				timers.resultPauseStart = GetTime();
 				ShowPopUp("DEALER HIT A BLACKJACK", RED, 3);
 				cpu.visual.back().SetFaceDown(false);
+				PlaySoundEffect(gameAudio.dealerBlackjack);
 				state = GameState::dealerPause;
 			}
 			else {
@@ -232,6 +241,7 @@ void Game::UpdateButtons(Hand &player,int y){
 				state = GameState::dealerPause;
 				timers.resultPauseStart = GetTime();
 				RevealHiddenCard();
+				PlaySoundEffect(gameAudio.playerSurrender);
 			}
 		}
 		else if (Double.IsButtonPressed()&&playerMain.bet<=money) {
@@ -281,7 +291,7 @@ void Game::cpuGet17(){
 	if (HasEnoughTimePassed(timers.dealerTurnStart, 0.8)) {
 		valRank card = deck.DrawCard();
 		cpu.cards.push_back(card);
-		cpu.visual.emplace_back(50 + cpu.visual.size() * cardSpacing, dealer_Y, card,&suitImages[card.rank],&mainFont,&gameImage,&cpu.results);
+		cpu.visual.emplace_back(50 + cpu.visual.size() * cardSpacing, dealer_Y, card, &suitImages[card.rank], &mainFont, &gameImage, &cpu.results, &gameAudio, &settings.IsSoundEffectsOn);
 	}
 }
 
@@ -399,7 +409,7 @@ void Game::StartRound(){
 
 void Game::SplitFunc(){
 	playerSplit.cards.push_back(playerMain.cards[1]);
-	playerSplit.visual.emplace_back(50, YOfSplitCards, playerSplit.cards[0], &suitImages[playerMain.visual[1].card.rank], &mainFont,&gameImage,&playerSplit.results);
+	playerSplit.visual.emplace_back(50, YOfSplitCards, playerSplit.cards[0], &suitImages[playerMain.visual[1].card.rank], &mainFont, &gameImage, &playerSplit.results, &gameAudio, &settings.IsSoundEffectsOn);
 	playerMain.visual.pop_back();
 	playerMain.cards.pop_back();
 	playerMain.results.pop_back();
@@ -421,7 +431,7 @@ void Game::ProcessDealQueue(double delay){
 		auto& d = dealQueue.front();
 		valRank v = deck.DrawCard();
 
-		d.cards->emplace_back(50 + d.cards->size() * cardSpacing, d.y, v, &suitImages[v.rank], &mainFont,&gameImage,d.results);
+		d.cards->emplace_back(50 + d.cards->size() * cardSpacing, d.y, v, &suitImages[v.rank], &mainFont, &gameImage, d.results, &gameAudio, &settings.IsSoundEffectsOn);
 		d.hand->emplace_back(v);
 
 		dealQueue.pop();
@@ -563,7 +573,7 @@ void Game::LoadLastGame(){
 				valRank card;
 				fin >> card.value >> card.rank;
 				playerMain.cards.push_back(card);
-				playerMain.visual.emplace_back(50 + i * cardSpacing, player_Y, card, &suitImages[card.rank], &mainFont,&gameImage,&playerMain.results);
+				playerMain.visual.emplace_back(50 + i * cardSpacing, player_Y, card, &suitImages[card.rank], &mainFont, &gameImage, &playerMain.results, &gameAudio, &settings.IsSoundEffectsOn);
 				playerMain.visual[i].GoImmediatelyToTarget();
 			}
 			int cpuHandSize;
@@ -574,7 +584,7 @@ void Game::LoadLastGame(){
 				bool faced;
 				fin >> card.value >> card.rank>>faced;
 				cpu.cards.push_back(card);
-				cpu.visual.emplace_back(50 + i * cardSpacing, dealer_Y, card, &suitImages[card.rank], &mainFont,&gameImage,&cpu.results);
+				cpu.visual.emplace_back(50 + i * cardSpacing, dealer_Y, card, &suitImages[card.rank], &mainFont, &gameImage, &cpu.results, &gameAudio, &settings.IsSoundEffectsOn);
 				cpu.visual[i].GoImmediatelyToTarget();
 				cpu.visual[i].SetFaceDown(faced);
 			}
@@ -596,7 +606,7 @@ void Game::LoadLastGame(){
 					valRank card;
 					fin >> card.value >> card.rank;
 					playerSplit.cards.push_back(card);
-					playerSplit.visual.emplace_back(50 + i * cardSpacing, YOfSplitCards, card, &suitImages[card.rank], &mainFont,&gameImage,&playerSplit.results);
+					playerSplit.visual.emplace_back(50 + i * cardSpacing, YOfSplitCards, card, &suitImages[card.rank], &mainFont, &gameImage, &playerSplit.results, &gameAudio, &settings.IsSoundEffectsOn);
 					playerSplit.visual[i].GoImmediatelyToTarget();
 				}
 				fin >> label >> bet;
@@ -632,6 +642,12 @@ void Game::UpdateCards(){
 
 void Game::RevealHiddenCard(){
 	cpu.visual[1].SetFaceDown(false);
+}
+
+void Game::PlaySoundEffect(Sound sound){
+	if (settings.IsSoundEffectsOn) {
+		PlaySound(sound);
+	}
 }
 
 Color Game::GetresultColor(ResultStates r)
@@ -674,25 +690,32 @@ ResultStates Game::ResolveHand(const Hand& hand){
 	if (playerScore > 21) return ResultStates::Lose;
 	if (dealerScore > 21) {
 		money += hand.bet * 2;
+		PlaySoundEffect(gameAudio.playerWin);
 		return ResultStates::Win;
 	}
 	else if (!splitHand &&playerScore == 21 && hand.cards.size() == 2) {
 		money += hand.bet * 5 / 2;
+		PlaySoundEffect(gameAudio.playerBlackjack);
 		return ResultStates::Blackjack;
 	}
 	else if (playerScore > dealerScore && playerScore <= 21) {
 		money += hand.bet * 2;
+		PlaySoundEffect(gameAudio.playerWin);
 		return ResultStates::Win;
 	}
 	else if (playerScore == dealerScore) {
 		money += hand.bet;
+		PlaySoundEffect(gameAudio.playerPush);
 		return ResultStates::Push;
 	}
+	PlaySoundEffect(gameAudio.playerLose);
 	return ResultStates::Lose;
 }
 
 
 void Game::Update() {
+	gameAudio.UpdateMusic(settings.IsMusicOn);
+
 	switch (state) {
 	case GameState::MainMenu:
 		mainMenu.Update();
