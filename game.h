@@ -6,8 +6,6 @@
 constexpr int player_Y = 650;
 constexpr int dealer_Y = 50;
 constexpr int cardSpacing = 160;
-inline float screenWidth = 1200;
-inline float screenHeight = 950;
 using namespace std;
 
 enum class ResultStates {
@@ -28,6 +26,12 @@ enum class GameState{
 	dealerTurn,
 	dealerPause,
 	roundEnd,
+};
+
+enum class GameMode {
+	Unlimited,
+	BestOf50,
+	BestOf20,
 };
 
 struct PendingDeal {
@@ -72,7 +76,11 @@ public:
 	void Draw();//All the drawing functions
 	void Update();//All the update functions
 	void SaveGame();//Saves the player's money to a file
-	
+
+	float scale;
+
+	Vector2 offset();
+
 private:
 
 	bool roundOver;
@@ -108,6 +116,8 @@ private:
 	void UpdateCards();
 	void RevealHiddenCard();
 	void PlaySoundEffect(Sound sound);
+	void UpdateScale();
+	void UpdateEveryFrame();
 
 	Timers timers;
 
@@ -116,6 +126,13 @@ private:
 	int GetScore(const vector<valRank>& hand);//Calculates the score of a hand
 	int GetScoreOfCard(int cardValue);//Calculates the score of a single card,do not use for more than two cards with GetScore
 	int YOfSplitCards = player_Y - 200 - 20;//Y position of split hand cards
+	int screenW;
+	int screenH;
+
+	float scaleX;
+	float scaleY;
+	float offsetX;
+	float offsetY;
 
 	Hand playerMain;
 	Hand playerSplit;

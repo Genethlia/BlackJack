@@ -8,6 +8,7 @@ public:
 	~MainMenu() = default;
 	void Draw();
 	void Update();
+	void SetTransform(float* scale, float* offsetX, float* offsetY);
 	int placeholder;
 private:
 	MainMenuButton playButton = MainMenuButton(300, "PLAY NEW GAME");

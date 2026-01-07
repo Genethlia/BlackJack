@@ -20,6 +20,26 @@ Game::Game(){
 	roundOver = false;
 
 	resultText = "";
+
+	UpdateScale();
+
+	hit.SetTransform(&scale, &offsetX, &offsetY);
+	stand.SetTransform(&scale, &offsetX, &offsetY);
+	Double.SetTransform(&scale, &offsetX, &offsetY);
+	Split.SetTransform(&scale, &offsetX, &offsetY);
+	Surrender.SetTransform(&scale, &offsetX, &offsetY);
+
+	for (int i = 0; i < 4; i++) {
+		betButtons[i].SetTransform(&scale, &offsetX, &offsetY);
+	}
+
+	undoButton.SetTransform(&scale, &offsetX, &offsetY);
+	confirmButton.SetTransform(&scale, &offsetX, &offsetY);
+	allInButton.SetTransform(&scale, &offsetX, &offsetY);
+	homeButton.SetTransform(&scale, &offsetX, &offsetY);
+
+	settings.SetTransform(&scale, &offsetX, &offsetY);
+	mainMenu.SetTransform(&scale, &offsetX, &offsetY);
 }
 
 Game::~Game(){
@@ -27,6 +47,7 @@ Game::~Game(){
 }
 
 void Game::Draw() {
+	
 	if (state == GameState::MainMenu) {
 		mainMenu.Draw();
 	}
@@ -146,9 +167,9 @@ void Game::DrawButtons(){
 void Game::DrawBackground() {
 	DrawTexture(gameImage.matTexture, 0, 0, WHITE);
 	if (state != GameState::betting && state != GameState::roundEnd) DrawDeck();
-	DrawRectangle(screenWidth - 295, 0, 295, 950, lightGreen);
-	DrawRectangle(screenWidth - 300, 0, 5, 950, BLACK);
-	DrawRectangleLinesEx({ 0,0,screenWidth,screenHeight }, 5, BLACK);
+	DrawRectangle(VIRTUAL_WIDTH - 295, 0, 295, 950, lightGreen);
+	DrawRectangle(VIRTUAL_WIDTH - 300, 0, 5, 950, BLACK);
+	DrawRectangleLinesEx({ 0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT }, 5, BLACK);
 }
 
 void Game::DrawDeck(){
@@ -165,13 +186,13 @@ void Game::DrawBetButtons(){
 	allInButton.Draw();
 }
 
-void Game::DrawMoneyBets(){
+void Game::DrawMoneyBets() {
 	string mon = (to_string(money) + "$");
 	float spacing = MeasureText(mon.c_str(), 32);
-	DrawTextEx(mainFont, mon.c_str(), { screenWidth - spacing,5 }, 32, 2, WHITE);
+	DrawTextEx(mainFont, mon.c_str(), { VIRTUAL_WIDTH - spacing,5 }, 32, 2, WHITE);
 	string be = ("Bet: " + to_string(playerMain.bet) + "$");
 	spacing = 290;
-	DrawTextEx(mainFont, be.c_str(), { screenWidth-spacing,5 }, 32, 2, WHITE);
+	DrawTextEx(mainFont, be.c_str(), { VIRTUAL_WIDTH - spacing,5 }, 32, 2, WHITE);
 }
 
 int Game::GetScore(const vector<valRank>& hand){
@@ -358,8 +379,8 @@ void Game::UpdateBettingButtons()
 
 void Game::DrawResultText(){
 		const char* PlayAgain = "Press any key to play again";
-		int x = (screenWidth-300) / 2;
-		int y = (screenHeight-350) / 2;
+		int x = (VIRTUAL_WIDTH-300) / 2;
+		int y = (VIRTUAL_HEIGHT-350) / 2;
 		int fontSize = 116;
 		int TextWidth = MeasureText(resultText, fontSize);
 		int positionX = x - TextWidth / 2;
@@ -461,8 +482,8 @@ void Game::DrawPopUpMessage(){
 	int textWidth = MeasureText(popUp.message.c_str(), fontSize);
 	int textHeight = fontSize;
 
-	int x = (screenWidth-300) / 2 - (textWidth + 2 * padding) / 2;
-	int y = screenHeight / 2 - (textHeight + 2 * padding) / 2;
+	int x = (VIRTUAL_WIDTH-300) / 2 - (textWidth + 2 * padding) / 2;
+	int y = VIRTUAL_HEIGHT / 2 - (textHeight + 2 * padding) / 2;
 
 	float alpha = 1.0f - (GetTime() - popUp.startTime) / popUp.displayTime;
 	DrawRectangle(x, y,textWidth + 2 * padding,textHeight + 2 * padding,Fade(BLACK, 0.6f*alpha));
@@ -531,6 +552,11 @@ void Game::SaveGame() {
 	else {
 		ShowPopUp("Failed To Save Game", RED, 3);
 	}
+}
+
+Vector2 Game::offset()
+{
+	return Vector2(offsetX, offsetY);
 }
 
 void Game::LoadLastGame(){
@@ -650,6 +676,24 @@ void Game::PlaySoundEffect(Sound sound){
 	}
 }
 
+void Game::UpdateScale(){
+	screenW = GetScreenWidth();
+	screenH = GetScreenHeight();
+
+	scaleX = (float)screenW / VIRTUAL_WIDTH;
+	scaleY = (float)screenH / VIRTUAL_HEIGHT;
+
+	scale = (scaleX < scaleY) ? scaleX : scaleY;
+
+	offsetX = (screenW - (VIRTUAL_WIDTH * scale)) / 2;
+	offsetY = (screenH - (VIRTUAL_HEIGHT * scale)) / 2;
+}
+
+void Game::UpdateEveryFrame(){
+	gameAudio.UpdateMusic(settings.IsMusicOn);
+	UpdateScale();
+}
+
 Color Game::GetresultColor(ResultStates r)
 {
 	switch (r) {
@@ -714,8 +758,7 @@ ResultStates Game::ResolveHand(const Hand& hand){
 
 
 void Game::Update() {
-	gameAudio.UpdateMusic(settings.IsMusicOn);
-
+	UpdateEveryFrame();
 	switch (state) {
 	case GameState::MainMenu:
 		mainMenu.Update();

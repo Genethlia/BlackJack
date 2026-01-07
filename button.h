@@ -7,12 +7,16 @@ protected:
     int width, offsetX, height;
     Color color[2] = {darkGreen,tableGreen};
     string type; // string to hold the text letters
+    float* scalePtr;
+    float* offsetXPtr;
+    float* offsetYPtr;
 private:
     string Text; // temporary string to hold the button text
     int findOffsetX(string type); // function to find the offset for text positioning
 public:
     int x,y;
     Button(int y, string Text);
+    void SetTransform(float* scale, float* offsetOfX, float* offsetY);
     virtual void Draw(); // draw the button
     bool IsButtonPressed(); // check if button is pressed
     virtual bool collision(); // check if mouse is over the button
@@ -62,7 +66,6 @@ public:
     OvalButton(int y, bool* state,string Text);
     void Draw() override;
     void Update();
-    bool collision() override;
 private:
     bool* state;
     int ovalWidth;

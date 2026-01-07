@@ -35,7 +35,13 @@ void Settings::LoadSettings(){
 	}
 	else {
 		ShouldDealerHitOn17 = false;
-		IsMusicOn = true;
+		IsMusicOn = false;
 		IsSoundEffectsOn = true;
 	}
+}
+
+void Settings::SetTransform(float* scale, float* offsetX, float* offsetY){
+	dealerHitOn17.SetTransform(scale, offsetX, offsetY);
+	musicOn.SetTransform(scale, offsetX, offsetY);
+	soundEffectsOn.SetTransform(scale, offsetX, offsetY);
 }

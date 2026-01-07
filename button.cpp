@@ -40,9 +40,19 @@ Button::Button(int y, string Text) {
 	width = 280;
 	height = 100;
 	type = Text;
+	offsetX = 0;
 	if (!Text.empty()) {
 		offsetX = findOffsetX(type);
 	}
+	scalePtr = nullptr;
+	offsetXPtr = nullptr;
+	offsetYPtr = nullptr;
+}
+
+void Button::SetTransform(float* scale, float* offsetOfX, float* offsetY){
+	this->scalePtr = scale;
+	this->offsetXPtr = offsetOfX;
+	this->offsetYPtr = offsetY;
 }
 
 void Button::Draw(){
@@ -60,7 +70,11 @@ bool Button::IsButtonPressed(){
 }
 
 bool Button::collision(){
+	if (!scalePtr || !offsetXPtr || !offsetYPtr) return false;
+
 	Vector2 position = GetMousePosition();
+	position.x = (position.x - *offsetXPtr) / *scalePtr;
+	position.y = (position.y - *offsetYPtr) / *scalePtr;
 	return CheckCollisionPointRec(position, Rectangle(x, y, width, height));
 }
 
@@ -117,10 +131,12 @@ void BetButton::Draw(){
 }
 
 bool BetButton::collision(){
-	if (CheckCollisionPointCircle(GetMousePosition(), Vector2(x, y),radius)) {
-		return true;
-	}
-	return false;
+	if (!scalePtr || !offsetXPtr || !offsetYPtr) return false;
+
+	Vector2 position = GetMousePosition();
+	position.x = (position.x - *offsetXPtr) / *scalePtr;
+	position.y = (position.y - *offsetYPtr) / *scalePtr;
+	return CheckCollisionPointCircle(position, Vector2(x, y), radius);
 }
 
 UndoConfirmButton::UndoConfirmButton(float y,string Text) : Button(y, Text) {
@@ -184,6 +200,8 @@ void HomeButton::FindX(int state){
 OvalButton::OvalButton(int y, bool* state,string Text):Button(y,"") {
 	x = 950;
 	this->y = y;
+	width = 100;
+	height = 50;
 	ovalWidth = 100;
 	ovalHeight = 50;
 	knobRadius = ovalHeight / 2 - 5;
@@ -217,11 +235,4 @@ void OvalButton::Update(){
 			*state = !*state;
 		}
 	}
-}
-
-bool OvalButton::collision(){
-	Vector2 mouseposition = GetMousePosition();
-	Rectangle rec = { (float)x,(float)y,(float)width,(float)height };
-
-	return CheckCollisionPointRec(mouseposition, rec);
 }
