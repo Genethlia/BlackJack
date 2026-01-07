@@ -118,6 +118,7 @@ private:
 	void PlaySoundEffect(Sound sound);
 	void UpdateScale();
 	void UpdateEveryFrame();
+	void SetTransform();
 
 	Timers timers;
 

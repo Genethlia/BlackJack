@@ -23,23 +23,7 @@ Game::Game(){
 
 	UpdateScale();
 
-	hit.SetTransform(&scale, &offsetX, &offsetY);
-	stand.SetTransform(&scale, &offsetX, &offsetY);
-	Double.SetTransform(&scale, &offsetX, &offsetY);
-	Split.SetTransform(&scale, &offsetX, &offsetY);
-	Surrender.SetTransform(&scale, &offsetX, &offsetY);
-
-	for (int i = 0; i < 4; i++) {
-		betButtons[i].SetTransform(&scale, &offsetX, &offsetY);
-	}
-
-	undoButton.SetTransform(&scale, &offsetX, &offsetY);
-	confirmButton.SetTransform(&scale, &offsetX, &offsetY);
-	allInButton.SetTransform(&scale, &offsetX, &offsetY);
-	homeButton.SetTransform(&scale, &offsetX, &offsetY);
-
-	settings.SetTransform(&scale, &offsetX, &offsetY);
-	mainMenu.SetTransform(&scale, &offsetX, &offsetY);
+	SetTransform();
 }
 
 Game::~Game(){
@@ -692,6 +676,26 @@ void Game::UpdateScale(){
 void Game::UpdateEveryFrame(){
 	gameAudio.UpdateMusic(settings.IsMusicOn);
 	UpdateScale();
+}
+
+void Game::SetTransform(){
+	hit.SetTransform(&scale, &offsetX, &offsetY);
+	stand.SetTransform(&scale, &offsetX, &offsetY);
+	Double.SetTransform(&scale, &offsetX, &offsetY);
+	Split.SetTransform(&scale, &offsetX, &offsetY);
+	Surrender.SetTransform(&scale, &offsetX, &offsetY);
+
+	for (int i = 0; i < 4; i++) {
+		betButtons[i].SetTransform(&scale, &offsetX, &offsetY);
+	}
+
+	undoButton.SetTransform(&scale, &offsetX, &offsetY);
+	confirmButton.SetTransform(&scale, &offsetX, &offsetY);
+	allInButton.SetTransform(&scale, &offsetX, &offsetY);
+	homeButton.SetTransform(&scale, &offsetX, &offsetY);
+
+	settings.SetTransform(&scale, &offsetX, &offsetY);
+	mainMenu.SetTransform(&scale, &offsetX, &offsetY);
 }
 
 Color Game::GetresultColor(ResultStates r)
