@@ -35,7 +35,7 @@ int Button::findOffsetX(string type){
 }
 
 Button::Button(int y, string Text) {
-	x = 910;
+	x = 1210;
 	this->y = y;
 	width = 280;
 	height = 100;
@@ -141,11 +141,11 @@ bool BetButton::collision(){
 
 UndoConfirmButton::UndoConfirmButton(float y,string Text) : Button(y, Text) {
 	this->y = y;
-	x = (GetScreenWidth() - 890) / 2;
+	x = (VIRTUAL_WIDTH - 590) / 2;
 	width = 600;
 }
 
-AllInButton::AllInButton():BetButton((GetScreenWidth()-300)/2,0){
+AllInButton::AllInButton():BetButton(VIRTUAL_WIDTH/2,0){
 	radius = 100;
 	Text = "ALL IN";
 	y = GetScreenHeight() / 2 -300;
@@ -180,7 +180,7 @@ void MainMenuButton::Draw(){
 }
 
 HomeButton::HomeButton():Button(5,"") {
-	x = 895 - 50;
+	x = 1195 - 50;
 	width = 50;
 	height = 50;
 	offsetX = 5;
@@ -191,14 +191,14 @@ HomeButton::HomeButton():Button(5,"") {
 void HomeButton::FindX(int state){
 	if (state == -1) return;
 	if (state == 2||state==3) {
-		x = 1150;
+		x = 1450;
 		return;
 	}
-	x = 845;
+	x = 1145;
 }
 
 OvalButton::OvalButton(int y, bool* state,string Text):Button(y,"") {
-	x = 950;
+	x = 1250;
 	this->y = y;
 	width = 100;
 	height = 50;

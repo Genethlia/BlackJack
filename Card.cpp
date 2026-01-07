@@ -2,8 +2,8 @@
 
 Card::Card(float x, float y, valRank card,Images* suitTextures,Font* font,Images* gameimages,vector<valRank>* cards,Audio* audio,bool* soundenabled)
   :suitTextures(suitTextures),font(font),gameimages(gameimages),cards(cards),gameaudio(audio),soundenabled(soundenabled) {
-	target = { x,y };
-	pos = { 800,300 };
+	target = { x+300,y };
+	pos = { 1100,300 };
 
 	width = 120;
 	height = 200;

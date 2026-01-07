@@ -67,6 +67,18 @@ struct Hand {
 	void ClearAll();
 };
 
+struct Stats {
+	int rounds = 0;
+	int wins = 0;
+	int losses = 0;
+	int pushes = 0;
+	int blackjacks = 0;
+	int biggestWin = 0;
+	int biggestLost = 0;
+
+	void Reset();
+};
+
 class Game {
 public:
 
@@ -129,6 +141,7 @@ private:
 	int YOfSplitCards = player_Y - 200 - 20;//Y position of split hand cards
 	int screenW;
 	int screenH;
+	int roundsPlayed;
 
 	float scaleX;
 	float scaleY;
@@ -145,7 +158,7 @@ private:
 	Button Split = Button(660, "SPLIT");
 	Button Surrender = Button(360, "GIVE UP");
 
-	BetButton betButtons[4] = { BetButton(150,10),BetButton(350,50),BetButton(550,100),BetButton(750,200) };
+	BetButton betButtons[4] = { BetButton(450,10),BetButton(650,50),BetButton(850,100),BetButton(1050,200) };
 	AllInButton allInButton = AllInButton();
 
 	UndoConfirmButton undoButton = UndoConfirmButton(550,"UNDO");

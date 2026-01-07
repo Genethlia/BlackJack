@@ -12,7 +12,7 @@
 #include "images.h"
 #include "Audio.h"
 namespace fs = std::filesystem;
-constexpr int VIRTUAL_WIDTH = 1200;
+constexpr int VIRTUAL_WIDTH = 1500;
 constexpr int VIRTUAL_HEIGHT = 950; 
 
 bool HasEnoughTimePassed(double& lastUpdateTime, double TimePassed);

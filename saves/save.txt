@@ -1,14 +1,22 @@
-Money: 1000
+Money: 0
 State: 3
 MainBet: 0
-LastBetSize: 0
-PlayerHandSize: 0
+LastBetSize: 4
+Bet4: 200
+Bet3: 100
+Bet2: 50
+Bet1: 2700
+PlayerHandSize: 2
 PlayerHand: 
-DealerHandSize: 0
+8 0
+12 1
+DealerHandSize: 2
 DealerHand: 
+11 2 0
+11 3 0
 
-CardsDealt: 0
-IsRoundOver: 0
+CardsDealt: 3
+IsRoundOver: 1
 IsSplitEnabledThisRound? 0
 SplitHandSize: 0
 SplitHand: 

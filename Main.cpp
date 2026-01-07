@@ -6,23 +6,21 @@ using namespace std;
 int main() {
 
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-	InitWindow(1200, 950, "BlackJack");
-	SetWindowMinSize(600, 475);
-	SetWindowMaxSize(1300, 1080);
+	InitWindow(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, "BlackJack");
+	SetWindowMinSize(600, 380);
+	SetWindowMaxSize(1500, 950);
 	SetTargetFPS(60);
 
 	Game game = Game();
 
 
 	while (!WindowShouldClose()&&!ShouldWindowClose) {
-		if (IsWindowResized()) {
+		if (IsWindowResized()||IsWindowFullscreen()) {
 			int currentWidth = GetScreenWidth();
 			int currentHeight = GetScreenHeight();
 
-			// Calculate what the height should be for the current width
 			int targetHeight = (int)(currentWidth / TARGET_ASPECT);
 
-			// Only adjust if there's a mismatch (avoid infinite loop)
 			if (abs(currentHeight - targetHeight) > 1) {
 				SetWindowSize(currentWidth, targetHeight);
 			}

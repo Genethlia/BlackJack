@@ -8,6 +8,7 @@ Game::Game(){
 	deck = Deck();
 	cardsDealtCount = 0;
 	money = 1000;
+	roundsPlayed = 0;
 	resultColor = RED;
 	splitHand = false;
 	dealToSplitHand = false;
@@ -116,6 +117,7 @@ void Game::DrawCards(){
 void Game::DrawScore(){
 	string Text;
 	int size = 32;
+	int XofScore=1215;
 	int YofScore=865;
 	if (!splitHand) {
 		Text = "Player Score: ";
@@ -126,14 +128,14 @@ void Game::DrawScore(){
 		Text = "First Hand Score: ";
 		int splitScore = GetScore(playerSplit.results);
 		string splitScoreText = "Second Hand Score: " + to_string(splitScore);
-		DrawText(splitScoreText.c_str(), 915, 910, size, WHITE);
+		DrawText(splitScoreText.c_str(), XofScore, 910, size, WHITE);
 	}
 	int playerScore = GetScore(playerMain.results);
 	int cpuScore = GetScore(cpu.results);
 	string playerScoreText = Text + to_string(playerScore);
 	string cpuScoreText = "Dealer Score: " + to_string(cpuScore);
-	DrawText(playerScoreText.c_str(), 915, YofScore, size, WHITE);
-	DrawText(cpuScoreText.c_str(), 915, 810, 32, WHITE);
+	DrawText(playerScoreText.c_str(), XofScore, YofScore, size, WHITE);
+	DrawText(cpuScoreText.c_str(), XofScore, 810, 32, WHITE);
 }
 
 void Game::DrawButtons(){
@@ -153,11 +155,13 @@ void Game::DrawBackground() {
 	if (state != GameState::betting && state != GameState::roundEnd) DrawDeck();
 	DrawRectangle(VIRTUAL_WIDTH - 295, 0, 295, 950, lightGreen);
 	DrawRectangle(VIRTUAL_WIDTH - 300, 0, 5, 950, BLACK);
+	DrawRectangle(0, 0, 295, 950, lightGreen);
+	DrawRectangle(295, 0, 5, 950, BLACK);
 	DrawRectangleLinesEx({ 0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT }, 5, BLACK);
 }
 
 void Game::DrawDeck(){
-	DrawTexture(gameImage.hiddenCardTexture, 700, 300, WHITE);
+	DrawTexture(gameImage.hiddenCardTexture, 1000, 300, WHITE);
 }
 
 
@@ -363,7 +367,7 @@ void Game::UpdateBettingButtons()
 
 void Game::DrawResultText(){
 		const char* PlayAgain = "Press any key to play again";
-		int x = (VIRTUAL_WIDTH-300) / 2;
+		int x = VIRTUAL_WIDTH / 2;
 		int y = (VIRTUAL_HEIGHT-350) / 2;
 		int fontSize = 116;
 		int TextWidth = MeasureText(resultText, fontSize);
@@ -377,11 +381,11 @@ void Game::DrawResultText(){
 
 			DrawText(TextFormat("HAND 2 %s", GetresultText(splitResult)),300, 600, fontSize/2,GetresultColor(splitResult));
 
-			DrawText("Press any key to play again", 200, 800, 32, BLACK);
+			DrawText("Press any key to play again", 500, 800, 32, BLACK);
 			return;
 		}
 		else {
-			DrawText(PlayAgain, 210, y + 200, 32, BLACK);
+			DrawText(PlayAgain, 510, y + 200, 32, BLACK);
 		}
 }
 
@@ -504,7 +508,12 @@ void Game::SaveGame() {
 			fout << int(GameState::betting);
 		}
 		fout << endl;
-		fout << "MainBet: " << playerMain.bet << endl;
+		if (roundOver) {
+			fout << "MainBet: 0" << endl;
+		}
+		else {
+			fout << "MainBet: " << playerMain.bet << endl;
+		}
 
 		vector<int> tempBets;
 		stack<int> copyStack = lastBet;
@@ -846,4 +855,8 @@ void Hand::ClearAll(){
 	visual.clear();
 	results.clear();
 	cards.clear();
+}
+
+void Stats::Reset(){
+	*this=Stats();
 }
