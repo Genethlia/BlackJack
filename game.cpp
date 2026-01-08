@@ -158,6 +158,7 @@ void Game::DrawBackground() {
 	DrawRectangle(0, 0, 295, 950, lightGreen);
 	DrawRectangle(295, 0, 5, 950, BLACK);
 	DrawRectangleLinesEx({ 0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT }, 5, BLACK);
+	DrawGameModeAndStats();
 }
 
 void Game::DrawDeck(){
@@ -373,8 +374,8 @@ void Game::DrawResultText(){
 		int TextWidth = MeasureText(resultText, fontSize);
 		int positionX = x - TextWidth / 2;
 		int otherpositionX = x - TextWidth / 2 + 80;
-		if (resultText == "PUSH") positionX = 270,otherpositionX=220;
-		if (resultText == "SPLIT RESULTS") fontSize = 80,positionX=100;
+		if (resultText == "PUSH") positionX = 570,otherpositionX=520;
+		if (resultText == "SPLIT RESULTS") fontSize = 80,positionX=400;
 		DrawText(resultText,positionX, y, fontSize, resultColor);
 		if (splitHand) {
 			DrawText(TextFormat("HAND 1 %s", GetresultText(mainResult)),300, 500, fontSize/2,GetresultColor(mainResult));
@@ -495,6 +496,7 @@ void Game::SaveGame() {
 	settings.SaveSettings();
 	if (state == GameState::settings || state == GameState::stats) return;
 
+	stats.SaveStats();
 	deck.SaveDeck();
 	ofstream fout("saves/save.txt");
 	if (fout.is_open()) {
@@ -554,6 +556,7 @@ Vector2 Game::offset()
 
 void Game::LoadLastGame(){
 	ifstream fin("saves/save.txt");
+	stats.LoadStats();
 	if (fin.is_open()) {
 		string label;
 		fin >> label >> money;
@@ -705,6 +708,27 @@ void Game::SetTransform(){
 
 	settings.SetTransform(&scale, &offsetX, &offsetY);
 	mainMenu.SetTransform(&scale, &offsetX, &offsetY);
+}
+
+void Game::DrawGameModeAndStats(){
+	DrawText("GAMEMODE:", 20, 50, 45, WHITE);
+	string label;
+	int posX=20;
+	switch (gamemode) {
+	case GameMode::Unlimited:
+		label = "UNLIMITED";
+		break;
+	case GameMode::BestOf20:
+		label = "BEST OF 20";
+		break;
+	case GameMode::BestOf50:
+		label = "BEST OF 50";
+		break;
+	default:
+		break;
+	}
+	DrawText(label.c_str(), posX, 150, 45, GOLD);
+	DrawText(to_string(stats.rounds).c_str(), 250, 600, 45, WHITE);
 }
 
 Color Game::GetresultColor(ResultStates r)
@@ -859,4 +883,31 @@ void Hand::ClearAll(){
 
 void Stats::Reset(){
 	*this=Stats();
+}
+
+void Stats::SaveStats(){
+	ofstream fout("saves/stats.txt");
+	if (fout.is_open()) {
+		fout << "Rounds: " << rounds << endl;
+		fout << "Wins: " << wins << endl;
+		fout << "Losses: " << losses << endl;
+		fout << "Pushes: " << pushes << endl;
+		fout << "BlackJacks: " << blackjacks << endl;
+		fout << "BiggestWin: " << biggestWin << endl;
+		fout << "BiggestLose: " << biggestLost << endl;
+	}
+}
+
+void Stats::LoadStats(){
+	ifstream fin("saves/stats.txt");
+	if (fin.is_open()) {
+		string label;
+		fin >> label >> rounds;
+		fin >> label >> wins;
+		fin >> label >> losses;
+		fin >> label >> pushes;
+		fin >> label >> blackjacks;
+		fin >> label >> biggestWin;
+		fin >> label >> biggestLost;
+	}
 }

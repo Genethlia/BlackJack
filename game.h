@@ -77,6 +77,8 @@ struct Stats {
 	int biggestLost = 0;
 
 	void Reset();
+	void LoadStats();
+	void SaveStats();
 };
 
 class Game {
@@ -131,6 +133,7 @@ private:
 	void UpdateScale();
 	void UpdateEveryFrame();
 	void SetTransform();
+	void DrawGameModeAndStats();
 
 	Timers timers;
 
@@ -196,4 +199,8 @@ private:
 	Settings settings = Settings();
 
 	Audio gameAudio=Audio();
+
+	GameMode gamemode = GameMode::Unlimited;
+
+	Stats stats;
 };
