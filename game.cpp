@@ -942,7 +942,7 @@ void Game::Update() {
 		break;
 	case GameState::stats:
 		UpdateHomeButton();
-		break();
+		break;
 	case GameState::betting:
 		UpdateBettingButtons();
 		break;
