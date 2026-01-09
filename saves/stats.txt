@@ -5,3 +5,4 @@ Pushes: 0
 BlackJacks: 0
 BiggestWin: 0
 BiggestLose: 0
+Money:0

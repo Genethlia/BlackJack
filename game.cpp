@@ -40,6 +40,14 @@ void Game::Draw() {
 		DrawHomeButton();
 		settings.Draw();
 	}
+	else if (state == GameState::selectGamemode) {
+		DrawHomeButton();
+		gameM.Draw();
+	}
+	else if (state == GameState::stats) {
+		DrawHomeButton();
+		DrawStatsPage();
+	}
 	else {
 		DrawBackground();
 		DrawHomeButton();
@@ -291,7 +299,7 @@ void Game::cpuGet17(){
 		if (GetScore(cpu.cards) <= 21) {
 			ShowPopUp("DEALER STANDS", WHITE, 3);
 		}
-		else {
+		else if(GetScore(cpu.cards)>21){
 			ShowPopUp("DEALER BUSTED", WHITE, 3);
 		}
 		timers.resultPauseStart = GetTime();
@@ -308,9 +316,31 @@ void Game::cpuGet17(){
 void Game::UpdateResults(){
 	if (roundOver) return;
 	if (!surrendered) {
+		auto applyStats = [&](ResultStates r, int bet) {
+			if (r == ResultStates::Win) {
+				stats.wins++;
+				stats.biggestWin = max(stats.biggestWin, bet);
+			}
+			else if (r == ResultStates::Push) {
+				stats.pushes++;
+			}
+			else if (r == ResultStates::Lose) {
+				stats.losses++;
+				stats.biggestLost = max(stats.biggestLost, bet);
+			}
+			else if (r == ResultStates::Blackjack) {
+				stats.wins++;
+				stats.blackjacks++;
+				stats.biggestWin = max(stats.biggestWin, bet * 3 / 2);
+			}
+			};
+
 		mainResult = ResolveHand(playerMain);
+		applyStats(mainResult, playerMain.bet);
+
 		if (splitHand) {
 			splitResult = ResolveHand(playerSplit);
+			applyStats(splitResult, playerSplit.bet);
 			resultText = "SPLIT RESULTS";
 			resultColor = WHITE;
 		}
@@ -320,9 +350,12 @@ void Game::UpdateResults(){
 		}
 	}
 	else {
+		stats.losses++;
 		resultText = "YOU GAVE UP";
 		resultColor = RED;
 	}
+	stats.rounds++;
+	stats.money = money;
 	roundOver = true;
 }
 
@@ -410,11 +443,13 @@ void Game::ResetRound(){
 		ResultStates mainResult = ResultStates::None;
 		ResultStates splitResult = ResultStates::None;
 		mainMenu.placeholder = -1;
+		gameM.placeholder = -1;
 }
 
-void Game::StartRound(){
+void Game::StartNewSession(){
 	ResetRound();
 	money = 1000;
+	stats.Reset();
 }
 
 void Game::SplitFunc(){
@@ -471,7 +506,7 @@ void Game::DrawPopUpMessage(){
 	int textWidth = MeasureText(popUp.message.c_str(), fontSize);
 	int textHeight = fontSize;
 
-	int x = (VIRTUAL_WIDTH-300) / 2 - (textWidth + 2 * padding) / 2;
+	int x = VIRTUAL_WIDTH / 2 - (textWidth + 2 * padding) / 2;
 	int y = VIRTUAL_HEIGHT / 2 - (textHeight + 2 * padding) / 2;
 
 	float alpha = 1.0f - (GetTime() - popUp.startTime) / popUp.displayTime;
@@ -494,13 +529,15 @@ void Game::SaveGame() {
 		fs::create_directories(folder);
 	}
 	settings.SaveSettings();
-	if (state == GameState::settings || state == GameState::stats) return;
+	if (state == GameState::settings || state == GameState::stats||state==GameState::selectGamemode) return;
 
 	stats.SaveStats();
 	deck.SaveDeck();
 	ofstream fout("saves/save.txt");
 	if (fout.is_open()) {
 		fout << "Money: " << money << endl;
+
+		fout << "GameMode: " << int(gamemode) << endl;
 
 		fout << "State: ";
 		if (state != GameState::MainMenu && state != GameState::roundEnd) {
@@ -560,6 +597,10 @@ void Game::LoadLastGame(){
 	if (fin.is_open()) {
 		string label;
 		fin >> label >> money;
+
+		int GameMod;
+		fin >> label >> GameMod;
+		gamemode = GameMode(GameMod);
 		
 		int Gamestate;
 		fin >> label >> Gamestate;
@@ -708,28 +749,77 @@ void Game::SetTransform(){
 
 	settings.SetTransform(&scale, &offsetX, &offsetY);
 	mainMenu.SetTransform(&scale, &offsetX, &offsetY);
+	gameM.SetTransform(&scale, &offsetX, &offsetY);
 }
 
 void Game::DrawGameModeAndStats(){
-	DrawText("GAMEMODE:", 20, 50, 45, WHITE);
-	string label;
-	int posX=20;
+	DrawTextEx(mainFont, "GAMEMODE", { 20, 50 }, 60, 2, WHITE);
+	string label,outof;
+	float posX = 20.0f;
 	switch (gamemode) {
 	case GameMode::Unlimited:
 		label = "UNLIMITED";
+		outof = "ROUNDS:    " + to_string(stats.rounds);
+		posX = 15.0f;
 		break;
 	case GameMode::BestOf20:
 		label = "BEST OF 20";
+		outof = "ROUNDS:" + to_string(stats.rounds)+"/20";
 		break;
 	case GameMode::BestOf50:
 		label = "BEST OF 50";
+		outof = "ROUNDS:" + to_string(stats.rounds)+"/50";
 		break;
 	default:
 		break;
 	}
-	DrawText(label.c_str(), posX, 150, 45, GOLD);
-	DrawText(to_string(stats.rounds).c_str(), 250, 600, 45, WHITE);
+	DrawTextEx(mainFont, "STATS", { 72,350 }, 60, 2, WHITE);
+	DrawTextEx(mainFont, label.c_str(), { posX, 150 }, 60, 2, GOLD);
+	DrawTextEx(mainFont, (outof).c_str(), { 20, 480 }, 50, 2, WHITE);
+	DrawTextEx(mainFont, ("WINS:        " + to_string(stats.wins)).c_str(), { 20,610 }, 50, 2, DARKGREEN);
+	DrawTextEx(mainFont, ("PUSHES:     " + to_string(stats.pushes)).c_str(), { 20,740 }, 50, 2, yellow);
+	DrawTextEx(mainFont, ("LOSSES:     " + to_string(stats.losses)).c_str(), { 20,870 }, 50, 2, RED);
 }
+
+void Game::HelperForSelectGameMode(){
+	StartNewSession();
+	state = GameState::betting;
+	homeButton.FindX(67);
+}
+
+void Game::DrawStatsPage(){
+		const char* title = "STATS";
+		Vector2 titleSize = MeasureTextEx(mainFont, title, 80, 2);
+		DrawTextEx(mainFont, title, { (1400 - titleSize.x) / 2, 20 }, 80, 2, GOLD);
+
+		string winsText = "WINS: " + to_string(stats.wins);
+		Vector2 winsSize = MeasureTextEx(mainFont, winsText.c_str(), 60, 2);
+		DrawTextEx(mainFont, winsText.c_str(), { (1400 - winsSize.x) / 2, 120 }, 60, 2, DARKGREEN);
+
+		string pushesText = "PUSHES: " + to_string(stats.pushes);
+		Vector2 pushesSize = MeasureTextEx(mainFont, pushesText.c_str(), 60, 2);
+		DrawTextEx(mainFont, pushesText.c_str(), { (1400 - pushesSize.x) / 2, 240 }, 60, 2, WHITE);
+
+		string lossesText = "LOSSES: " + to_string(stats.losses);
+		Vector2 lossesSize = MeasureTextEx(mainFont, lossesText.c_str(), 60, 2);
+		DrawTextEx(mainFont, lossesText.c_str(), { (1400 - lossesSize.x) / 2, 360 }, 60, 2, RED);
+
+		string blackjacksText = "BLACKJACKS: " + to_string(stats.blackjacks);
+		Vector2 blackjacksSize = MeasureTextEx(mainFont, blackjacksText.c_str(), 60, 2);
+		DrawTextEx(mainFont, blackjacksText.c_str(), { (1400 - blackjacksSize.x) / 2, 480 }, 60, 2, yellow);
+
+		string bigWinText = "BIGGEST WIN: " + to_string(stats.biggestWin);
+		Vector2 bigWinSize = MeasureTextEx(mainFont, bigWinText.c_str(), 60, 2);
+		DrawTextEx(mainFont, bigWinText.c_str(), { (1400 - bigWinSize.x) / 2, 600 }, 60, 2, DARKGREEN);
+
+		string bigLossText = "BIGGEST LOSS: " + to_string(stats.biggestLost);
+		Vector2 bigLossSize = MeasureTextEx(mainFont, bigLossText.c_str(), 60, 2);
+		DrawTextEx(mainFont, bigLossText.c_str(), { (1400 - bigLossSize.x) / 2, 720 }, 60, 2, RED);
+
+		string moneyText = "FINAL MONEY: " + to_string(stats.money);
+		Vector2 moneySize = MeasureTextEx(mainFont, moneyText.c_str(), 60, 2);
+		DrawTextEx(mainFont, moneyText.c_str(), { (1400 - moneySize.x) / 2, 840 }, 60, 2, WHITE);
+	}
 
 Color Game::GetresultColor(ResultStates r)
 {
@@ -768,13 +858,16 @@ const char* Game::GetresultText(ResultStates r)
 ResultStates Game::ResolveHand(const Hand& hand){
 	int playerScore = GetScore(hand.cards);
 	int dealerScore = GetScore(cpu.cards);
-	if (playerScore > 21) return ResultStates::Lose;
+	if (playerScore > 21) {
+		PlaySoundEffect(gameAudio.playerLose);
+		return ResultStates::Lose;
+	}
 	if (dealerScore > 21) {
 		money += hand.bet * 2;
 		PlaySoundEffect(gameAudio.playerWin);
 		return ResultStates::Win;
 	}
-	else if (!splitHand &&playerScore == 21 && hand.cards.size() == 2) {
+	else if (playerScore == 21 && hand.cards.size() == 2) {
 		money += hand.bet * 5 / 2;
 		PlaySoundEffect(gameAudio.playerBlackjack);
 		return ResultStates::Blackjack;
@@ -800,28 +893,56 @@ void Game::Update() {
 	case GameState::MainMenu:
 		mainMenu.Update();
 		homeButton.FindX(mainMenu.placeholder);
-		if (mainMenu.placeholder == -1) {
+		switch (mainMenu.placeholder) {
+		case 0:
+			state = GameState::selectGamemode;
 			break;
-		}
-		else if (mainMenu.placeholder == 0) {
-			StartRound();
-		}
-		else if (mainMenu.placeholder == 1) {
-			StartRound();
+		case 1:
+			StartNewSession();
 			LoadLastGame();
 			timers.SetAllTimersToNow();
-		}
-		else if (mainMenu.placeholder == 2) {
+			break;
+		case 2:
 			state = GameState::settings;
-		}
-		else if (mainMenu.placeholder == 4) {
+			break;
+		case 3:
+			state = GameState::stats;
+			stats.LoadStats();
+			break;
+		case 4:
 			ShouldWindowClose = true;
+			break;
+		default:
+			break;
+		}
+		break;
+	case GameState::selectGamemode:
+		UpdateHomeButton();
+		gameM.Update();
+		switch (gameM.placeholder) {
+		case 0:
+			gamemode = GameMode::Unlimited;
+			HelperForSelectGameMode();
+			break;
+		case 1:
+			gamemode = GameMode::BestOf20;
+			HelperForSelectGameMode();
+			break;
+		case 2:
+			gamemode = GameMode::BestOf50;
+			HelperForSelectGameMode();
+			break;
+		default:
+			break;
 		}
 		break;
 	case GameState::settings:
 		UpdateHomeButton();
 		settings.Update();
 		break;
+	case GameState::stats:
+		UpdateHomeButton();
+		break();
 	case GameState::betting:
 		UpdateBettingButtons();
 		break;
@@ -852,6 +973,13 @@ void Game::Update() {
 		break;
 	case GameState::roundEnd:
 		UpdateResults();
+
+		if (gamemode == GameMode::BestOf20 && stats.rounds >= 20 || gamemode == GameMode::BestOf50 && stats.rounds >= 50) {
+			state = GameState::stats;
+			stats.SaveStats();
+			break;
+		}
+
 		if (GetKeyPressed()) {
 			ResetRound();
 		}
@@ -895,7 +1023,9 @@ void Stats::SaveStats(){
 		fout << "BlackJacks: " << blackjacks << endl;
 		fout << "BiggestWin: " << biggestWin << endl;
 		fout << "BiggestLose: " << biggestLost << endl;
+		fout << "Money:" << money << endl;
 	}
+	this->Reset();
 }
 
 void Stats::LoadStats(){
@@ -909,5 +1039,6 @@ void Stats::LoadStats(){
 		fin >> label >> blackjacks;
 		fin >> label >> biggestWin;
 		fin >> label >> biggestLost;
+		fin >> label >> money;
 	}
 }

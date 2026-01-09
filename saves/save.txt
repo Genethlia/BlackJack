@@ -1,5 +1,6 @@
 Money: 1000
-State: 3
+GameMode: 0
+State: 4
 MainBet: 0
 LastBetSize: 0
 PlayerHandSize: 0

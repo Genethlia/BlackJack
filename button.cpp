@@ -190,7 +190,7 @@ HomeButton::HomeButton():Button(5,"") {
 
 void HomeButton::FindX(int state){
 	if (state == -1) return;
-	if (state == 2||state==3) {
+	if (state == 2||state==3||state==0) {
 		x = 1450;
 		return;
 	}

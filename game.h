@@ -18,6 +18,7 @@ enum class ResultStates {
 
 enum class GameState{
 	MainMenu,
+	selectGamemode,
 	settings,
 	stats,
 	betting,
@@ -75,6 +76,7 @@ struct Stats {
 	int blackjacks = 0;
 	int biggestWin = 0;
 	int biggestLost = 0;
+	int money = 0;
 
 	void Reset();
 	void LoadStats();
@@ -117,7 +119,7 @@ private:
 	void UpdateBettingButtons();//Updates bets based on button presses
 	void DrawResultText();//Draws the result text
 	void ResetRound();//Resets the game state for a new round
-	void StartRound();//Starts new round
+	void StartNewSession();//Starts new round
 	void SplitFunc();//Splits the player's hand into two hands
 	void QueueHit(Hand& hand, int y);
 	void ProcessDealQueue(double delay);//Processes the pending deal queue
@@ -134,6 +136,8 @@ private:
 	void UpdateEveryFrame();
 	void SetTransform();
 	void DrawGameModeAndStats();
+	void HelperForSelectGameMode();
+	void DrawStatsPage();
 
 	Timers timers;
 
@@ -201,6 +205,9 @@ private:
 	Audio gameAudio=Audio();
 
 	GameMode gamemode = GameMode::Unlimited;
+	const int maxrounds = INT_MAX;
 
 	Stats stats;
+
+	Gamemode gameM = Gamemode();
 };
