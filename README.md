@@ -1,84 +1,78 @@
-🎰 Blackjack (Raylib Edition)
+♠️ Blackjack Game — C++ / raylib
 
-A graphical Blackjack game written in C++ using raylib.
-This version features a windowed UI with card rendering and interactive gameplay.
+A fully featured Blackjack game developed in C++ using raylib, focused on clean architecture, game-state management, and complete gameplay systems.
 
-✨ Features
+This project was built as a learning exercise to move beyond basic gameplay logic and into structured game development, including UI flow, persistence, and statistics tracking.
 
-  🎨 Graphical window with raylib
+🎮 Features
 
-  🃏 Card rendering using custom images
+Classic Blackjack gameplay
 
-  🤵 Player vs Dealer gameplay
+Multiple game modes:
 
-  💥 Hit / Stand functionality
+Unlimited Mode
 
-  🔢 Score calculation with Ace handling
+Best of 20 / Best of 50
 
-  🗂️ Asset management (images & fonts)
+Split hands
 
-🛠️ Built With
+Double down
 
-  C++
+Surrender
 
-  raylib
+Configurable dealer rules
 
-  Custom fonts and image assets
+Sound effects and music (toggleable)
 
-▶️ Getting Started
-Prerequisites
-  
-  C++ compiler (g++, clang, or MSVC)
-  
-  raylib installed and set up
-  
-  Windows / Linux / macOS
+Save & load system
 
-Build & Run
-  Example (g++ on Windows / MinGW)
-  g++ src/*.cpp -o blackjack -lraylib -lopengl32 -lgdi32 -lwinmm
+Session-based statistics screen
 
-Run the Game
-  ./blackjack
+Animated UI with scalable window
 
-   Make sure the assets folder is in the same directory as the executable.
+Clear state-machine–driven game flow
 
-🎮 Gameplay Rules
+🧠 Technical Highlights
 
-  Standard Blackjack rules
-  
-  Dealer hits until 17
-  
-  Face cards = 10
-  
-  Aces = 1 or 11
-  
-  Closest to 21 without going over wins
+Written in modern C++
 
-🚧 Roadmap / Work in Progress
-  
-  Animations & effects
-  
-  Sound effects
-  
-  Menu & restart screen
-  
-  Save / load functionality
+Built with raylib
 
-📌 Notes
+State machine architecture for menus and gameplay
 
-  Currently contains only the raylib version
-  
-  Terminal-based version will be added later
+Separation of game logic, rendering, and input
 
-📷 Screenshots
-<img width="1194" height="978" alt="Screenshot 2025-12-27 180155" src="https://github.com/user-attachments/assets/2004f3fe-474c-4714-ae30-9acef3035f56" />
-<img width="1207" height="979" alt="Screenshot 2025-12-27 180313" src="https://github.com/user-attachments/assets/75bfe1b7-3d38-477b-b918-7106f1d1a7ad" />
+File-based save system
 
+Robust session stats tracking with edge-case handling
 
+🎮 Controls
 
+Mouse: Navigate menus and buttons
 
-📜 License
+Keyboard: Continue rounds and confirm actions
 
-This project is for learning and personal use.
-Assets belong to their respective owners.
+All gameplay actions are handled through on-screen UI.
+
+📊 Statistics
+
+At the end of session-based modes, the game displays:
+
+Rounds played
+
+Wins, losses, and pushes
+
+Blackjacks
+
+Biggest win and biggest loss
+
+🚀 Project Status
+
+✅ Complete
+
+This project is finished and no longer under development.
+It serves as a foundation project before transitioning to Unreal Engine 5.
+
+<img width="1492" height="981" alt="Screenshot 2026-01-09 181953" src="https://github.com/user-attachments/assets/7b378102-67ec-46cb-a90d-385b0384406a" />
+<img width="1500" height="976" alt="Screenshot 2026-01-09 182005" src="https://github.com/user-attachments/assets/1d7434d7-34dd-41d7-8d66-9b2651f7b000" />
+<img width="1494" height="973" alt="Screenshot 2026-01-09 182150" src="https://github.com/user-attachments/assets/00e79771-e318-4311-b03a-b6c510dfa1ea" />
