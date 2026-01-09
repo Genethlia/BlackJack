@@ -1,4 +1,4 @@
-Money: 1175
+Money: 1000
 GameMode: 2
 State: 4
 MainBet: 0

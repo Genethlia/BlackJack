@@ -71,7 +71,7 @@ struct Hand {
 };
 
 struct Stats {
-	int rounds = 19;
+	int rounds = 0;
 	int wins = 0;
 	int losses = 0;
 	int pushes = 0;
