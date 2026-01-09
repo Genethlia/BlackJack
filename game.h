@@ -27,6 +27,7 @@ enum class GameState{
 	dealerTurn,
 	dealerPause,
 	roundEnd,
+	gameEnd,
 };
 
 enum class GameMode {
@@ -55,6 +56,7 @@ struct Timers {
 	double animationStart=0.0;//For dealing cards over time
 	double dealerTurnStart=0.0;//For dealer drawing cards over time
 	double resultPauseStart=0.0;//For pausing before showing results
+	double gamePauseStart = 0.0;
 
 	void ResetTimers();
 	void SetAllTimersToNow();
@@ -69,7 +71,7 @@ struct Hand {
 };
 
 struct Stats {
-	int rounds = 0;
+	int rounds = 19;
 	int wins = 0;
 	int losses = 0;
 	int pushes = 0;
@@ -138,6 +140,7 @@ private:
 	void DrawGameModeAndStats();
 	void HelperForSelectGameMode();
 	void DrawStatsPage();
+	void GameEndPause(double delay);
 
 	Timers timers;
 

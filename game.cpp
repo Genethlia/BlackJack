@@ -53,9 +53,9 @@ void Game::Draw() {
 		DrawHomeButton();
 		if (state == GameState::betting) DrawBetButtons();
 		else { DrawButtons(); };
-		if (state != GameState::roundEnd && state != GameState::betting) DrawCards();
+		if (state != GameState::roundEnd && state != GameState::betting&&state!=GameState::gameEnd) DrawCards();
 		DrawScore();
-		if (state == GameState::roundEnd)	DrawResultText();
+		if (state == GameState::roundEnd||state==GameState::gameEnd)	DrawResultText();
 		DrawMoneyBets();
 		DrawPopUpMessage();
 	}
@@ -411,9 +411,9 @@ void Game::DrawResultText(){
 		if (resultText == "SPLIT RESULTS") fontSize = 80,positionX=400;
 		DrawText(resultText,positionX, y, fontSize, resultColor);
 		if (splitHand) {
-			DrawText(TextFormat("HAND 1 %s", GetresultText(mainResult)),300, 500, fontSize/2,GetresultColor(mainResult));
+			DrawText(TextFormat("HAND 1 %s", GetresultText(mainResult)),600, 500, fontSize/2,GetresultColor(mainResult));
 
-			DrawText(TextFormat("HAND 2 %s", GetresultText(splitResult)),300, 600, fontSize/2,GetresultColor(splitResult));
+			DrawText(TextFormat("HAND 2 %s", GetresultText(splitResult)),600, 600, fontSize/2,GetresultColor(splitResult));
 
 			DrawText("Press any key to play again", 500, 800, 32, BLACK);
 			return;
@@ -821,6 +821,12 @@ void Game::DrawStatsPage(){
 		DrawTextEx(mainFont, moneyText.c_str(), { (1400 - moneySize.x) / 2, 840 }, 60, 2, WHITE);
 	}
 
+void Game::GameEndPause(double delay){
+	if(GetTime()-timers.gamePauseStart>delay){
+		state = GameState::stats;
+	}
+}
+
 Color Game::GetresultColor(ResultStates r)
 {
 	switch (r) {
@@ -972,17 +978,19 @@ void Game::Update() {
 		DealerPauseUpdate(3);
 		break;
 	case GameState::roundEnd:
-		UpdateResults();
-
+			UpdateResults();
 		if (gamemode == GameMode::BestOf20 && stats.rounds >= 20 || gamemode == GameMode::BestOf50 && stats.rounds >= 50) {
-			state = GameState::stats;
-			stats.SaveStats();
+			state = GameState::gameEnd;
+			timers.gamePauseStart=GetTime();
 			break;
 		}
 
 		if (GetKeyPressed()) {
 			ResetRound();
 		}
+		break;
+	case GameState::gameEnd:
+		GameEndPause(3);
 		break;
 	default:
 		break;

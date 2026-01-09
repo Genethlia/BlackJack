@@ -1,8 +1,8 @@
-Rounds: 0
-Wins: 0
+Rounds: 20
+Wins: 1
 Losses: 0
 Pushes: 0
 BlackJacks: 0
-BiggestWin: 0
+BiggestWin: 50
 BiggestLose: 0
-Money:0
+Money:1050

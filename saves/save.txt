@@ -1,5 +1,5 @@
-Money: 1000
-GameMode: 0
+Money: 1175
+GameMode: 2
 State: 4
 MainBet: 0
 LastBetSize: 0
