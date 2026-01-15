@@ -7,7 +7,7 @@ int main() {
 
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, "BlackJack");
-	SetWindowMinSize(600, 380);
+	SetWindowMinSize(720, 456);
 	SetWindowMaxSize(1500, 950);
 	SetTargetFPS(60);
 

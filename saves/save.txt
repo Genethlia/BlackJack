@@ -1,14 +1,21 @@
-Money: 1000
-GameMode: 2
-State: 4
-MainBet: 0
-LastBetSize: 0
-PlayerHandSize: 0
+Money: 950
+GameMode: 0
+State: 8
+MainBet: 50
+LastBetSize: 1
+Bet1: 50
+PlayerHandSize: 2
 PlayerHand: 
-DealerHandSize: 0
+12 0
+8 0
+DealerHandSize: 4
 DealerHand: 
+5 3 0
+13 2 0
+2 2 0
+1 2 0
 
-CardsDealt: 0
+CardsDealt: 3
 IsRoundOver: 0
 IsSplitEnabledThisRound? 0
 SplitHandSize: 0

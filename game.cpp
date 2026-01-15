@@ -48,6 +48,9 @@ void Game::Draw() {
 		DrawHomeButton();
 		DrawStatsPage();
 	}
+	else if (state == GameState::gameEnd) {
+		DrawHomeButton();
+	}
 	else {
 		DrawBackground();
 		DrawHomeButton();
@@ -979,7 +982,7 @@ void Game::Update() {
 		break;
 	case GameState::roundEnd:
 			UpdateResults();
-		if (gamemode == GameMode::BestOf20 && stats.rounds >= 20 || gamemode == GameMode::BestOf50 && stats.rounds >= 50) {
+		if (gamemode == GameMode::BestOf20 && stats.rounds >= 20 || gamemode == GameMode::BestOf50 && stats.rounds >= 50||money==0) {
 			state = GameState::gameEnd;
 			timers.gamePauseStart=GetTime();
 			break;
@@ -990,7 +993,7 @@ void Game::Update() {
 		}
 		break;
 	case GameState::gameEnd:
-		GameEndPause(3);
+		GameEndPause(1);
 		break;
 	default:
 		break;
